@@ -13,7 +13,47 @@ return new class extends Migration
     {
         Schema::create('posts', function (Blueprint $table) {
             $table->id();
+
+            $table->foreignId('author_id')
+                ->constrained('admins')
+                ->restrictOnDelete();
+
+            $table->foreignId('category_id')
+                ->nullable()
+                ->constrained('categories')
+                ->nullOnDelete();
+
+            $table->foreignId('approved_by')
+                ->nullable()
+                ->constrained('admins')
+                ->nullOnDelete();
+
+            $table->string('title');
+            $table->string('slug')->unique();
+            $table->text('excerpt')->nullable();
+            $table->longText('content');
+            $table->string('featured_image')->nullable();
+
+            $table->string('status', 20)->default('draft');
+            $table->text('rejection_reason')->nullable();
+
+            $table->timestamp('approved_at')->nullable();
+            $table->timestamp('published_at')->nullable();
+            $table->timestamp('scheduled_at')->nullable();
+
+            $table->unsignedBigInteger('view_count')->default(0);
+            $table->boolean('is_featured')->default(false);
+
+            $table->string('meta_title')->nullable();
+            $table->text('meta_description')->nullable();
+
             $table->timestamps();
+            $table->softDeletes();
+
+            $table->index(['status', 'published_at']);
+            $table->index(['author_id', 'status']);
+            $table->index(['category_id', 'status']);
+            $table->index(['is_featured', 'published_at']);
         });
     }
 
