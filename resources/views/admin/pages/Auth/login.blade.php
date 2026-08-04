@@ -102,27 +102,48 @@
                         <h4 class="mb-3 secondary-font">به دیدبان شهر خوش آمدید!</h4>
                         <p class="mb-4">لطفا وارد حساب خود شده و ماجراجویی را شروع کنید</p>
 
-                        <form id="formAuthentication" class="mb-3" action="index.html" method="POST">
+                        @if (session('error'))
+                            <div class="alert alert-danger">
+                                {{ session('error') }}
+                            </div>
+                        @endif
+                        <form id="formAuthentication" class="mb-3" action="{{ route('admin.login.post') }}"
+                            method="POST">
+                            @csrf
                             <div class="mb-3">
-                                <label for="email" class="form-label">ایمیل یا نام کاربری</label>
-                                <input type="text" class="form-control text-start" id="email"
-                                    name="email-username" placeholder="ایمیل یا نام کاربری خود را وارد کنید" autofocus
-                                    dir="ltr">
+                                <label for="email" class="form-label">ایمیل </label>
+                                <input type="email" name='email'
+                                    class="form-control text-start @error('email') is-invalid @enderror"
+                                    id="email" placeholder="ایمیل خود را وارد کنید" autofocus
+                                    autocomplete="email" dir="ltr">
+
+
+                                @error('email')
+                                    <div class="invalid-feedback text-end">
+                                        {{ $message }}
+                                    </div>
+                                @enderror
                             </div>
                             <div class="mb-3 form-password-toggle">
                                 <div class="d-flex justify-content-between">
                                     <label class="form-label" for="password">رمز عبور</label>
                                 </div>
                                 <div class="input-group input-group-merge">
-                                    <input type="password" id="password" class="form-control text-start"
-                                        name="password" placeholder="············" aria-describedby="password"
-                                        dir="ltr">
+                                    <input type="password" name='password' id="password"
+                                        class="form-control text-start @error('password') is-invalid @enderror"
+                                        placeholder="············" aria-describedby="password" dir="ltr">
                                     <span class="input-group-text cursor-pointer"><i class="bx bx-hide"></i></span>
                                 </div>
+                                @error('password')
+                                    <div class="text-danger mt-1 text-end small">
+                                        {{ $message }}
+                                    </div>
+                                @enderror
                             </div>
 
                             <div class="mb-3">
-                                <button class="btn btn-primary d-grid w-100" type="submit">ورود</button>
+                                <button type='submit' class="btn btn-primary d-grid w-100"
+                                    type="submit">ورود</button>
                             </div>
                         </form>
                     </div>
