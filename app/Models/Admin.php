@@ -34,4 +34,15 @@ class Admin extends Authenticatable
             'is_active' => 'boolean',
         ];
     }
+
+    
+    public function hasRole($roleName)
+    {
+        return $this->roles()->where('name', $roleName)->exists();
+    }
+
+    public function isSuperAdmin()
+    {
+        return $this->hasRole('super-admin');
+    }
 }
