@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\Auth\LoginController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\AdminController;
+use App\Http\Controllers\Admin\TagController;
 use Illuminate\Support\Facades\Route;
 
 // Route::get('/', function () {
@@ -39,9 +40,16 @@ Route::prefix('didebaneshahr/admin')->name('admin.')->group(function () {
             Route::get('/', [AdminController::class, 'index'])->name('index');
             Route::get('/create', [AdminController::class, 'create'])->name('create');
             Route::post('/store', [AdminController::class, 'store'])->name('store');
-
             Route::get('/edit/{admin}', [AdminController::class, 'edit'])->name('edit');
             Route::post('/update/{admin}', [AdminController::class, 'update'])->name('update');
+        });
+
+        Route::prefix('tags')->name('tags.')->group(function () {
+            Route::get('/', [TagController::class, 'index'])->name('index');
+            Route::post('/store', [TagController::class, 'store'])->name('store');
+            Route::get('/edit/{tag}', [TagController::class, 'edit'])->name('edit');
+            Route::put('/update/{tag}', [TagController::class, 'update'])->name('update');
+            Route::delete('/destroy/{tag}', [TagController::class, 'destroy'])->name('destroy');
         });
     });
 });

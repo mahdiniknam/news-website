@@ -77,38 +77,6 @@
                                 <div>ایجاد</div>
                             </a>
                         </li>
-                        <li class="menu-item">
-                            <a href="javascript:void(0);" class="menu-link menu-toggle">
-                                <div data-i18n="View">نمایش</div>
-                            </a>
-                            <ul class="menu-sub">
-                                <li class="menu-item">
-                                    <a href="app-user-view-account.html" class="menu-link">
-                                        <div data-i18n="Account">حساب</div>
-                                    </a>
-                                </li>
-                                <li class="menu-item">
-                                    <a href="app-user-view-security.html" class="menu-link">
-                                        <div data-i18n="Security">امنیت</div>
-                                    </a>
-                                </li>
-                                <li class="menu-item">
-                                    <a href="app-user-view-billing.html" class="menu-link">
-                                        <div data-i18n="Billing & Plans">صورتحساب و پلن‌ها</div>
-                                    </a>
-                                </li>
-                                <li class="menu-item">
-                                    <a href="app-user-view-notifications.html" class="menu-link">
-                                        <div data-i18n="Notifications">اعلان‌ها</div>
-                                    </a>
-                                </li>
-                                <li class="menu-item">
-                                    <a href="app-user-view-connections.html" class="menu-link">
-                                        <div data-i18n="Connections">اتصالات</div>
-                                    </a>
-                                </li>
-                            </ul>
-                        </li>
                     </ul>
                 </li>
             @endrole
@@ -128,7 +96,14 @@
                     </ul>
                 </li>
             @endrole
-
+            @role('super-admin')
+                  <li class="menu-item">
+                <a href="{{ route('admin.tags.index') }}" class="menu-link">
+                    <i class="menu-icon tf-icons bx bx-home-circle"></i>
+                    <div >تگ ها</div>
+                </a>
+            </li>
+            @endrole
 
         </ul>
     </aside>
