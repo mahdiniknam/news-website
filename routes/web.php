@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\Auth\LoginController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\AdminController;
+use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\TagController;
 use Illuminate\Support\Facades\Route;
 
@@ -50,6 +51,15 @@ Route::prefix('didebaneshahr/admin')->name('admin.')->group(function () {
             Route::get('/edit/{tag}', [TagController::class, 'edit'])->name('edit');
             Route::put('/update/{tag}', [TagController::class, 'update'])->name('update');
             Route::delete('/destroy/{tag}', [TagController::class, 'destroy'])->name('destroy');
+        });
+
+
+        Route::prefix('categories')->name('categories.')->group(function () {
+            Route::get('/', [CategoryController::class, 'index'])->name('index');
+            Route::post('/store', [CategoryController::class, 'store'])->name('store');
+            Route::get('/edit/{category}', [CategoryController::class, 'edit'])->name('edit');
+            Route::put('/update/{category}', [CategoryController::class, 'update'])->name('update');
+            Route::delete('/destroy/{category}', [CategoryController::class, 'destroy'])->name('destroy');
         });
     });
 });

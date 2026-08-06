@@ -104,6 +104,14 @@
                 </a>
             </li>
             @endrole
+             @role('super-admin')
+                  <li class="menu-item">
+                <a href="{{ route('admin.categories.index') }}" class="menu-link">
+                    <i class="menu-icon tf-icons bx bx-home-circle"></i>
+                    <div >دسته بندی ها</div>
+                </a>
+            </li>
+            @endrole
 
         </ul>
     </aside>
