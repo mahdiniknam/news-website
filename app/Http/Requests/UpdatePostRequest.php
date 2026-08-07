@@ -29,9 +29,10 @@ class UpdatePostRequest extends FormRequest
             'content' => 'required|string',
             'featured_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
             'is_featured' => 'nullable|boolean',
-           
+
             'meta_title' => 'nullable|string|max:255',
             'meta_description' => 'nullable|string|max:500',
+            'type' => 'nullable|in:news,note,interview',
         ];
     }
 
@@ -44,6 +45,7 @@ class UpdatePostRequest extends FormRequest
             'category_id.exists' => 'دسته‌بندی انتخاب شده معتبر نیست',
             'featured_image.image' => 'فایل انتخاب شده باید تصویر باشد',
             'featured_image.max' => 'حجم تصویر نباید بیشتر از ۵ مگابایت باشد',
+            'type.in' => 'نوع خبر انتخاب شده معتبر نیست',
         ];
     }
 

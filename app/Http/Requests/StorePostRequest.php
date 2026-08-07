@@ -25,7 +25,7 @@ class StorePostRequest extends FormRequest
             'is_featured' => 'nullable|boolean',
             'meta_title' => 'nullable|string|max:255',
             'meta_description' => 'nullable|string|max:500',
-            'type' => 'required|in:new,note,Interview',
+            'type' => 'required|in:news,note,interview',
         ];
     }
 
@@ -43,11 +43,11 @@ class StorePostRequest extends FormRequest
         ];
     }
 
-    protected function prepareForValidation(): void
-    {
-        $this->merge([
-            'is_featured' => $this->has('is_featured'),
+    // protected function prepareForValidation(): void
+    // {
+    //     $this->merge([
+    //         'is_featured' => $this->has('is_featured'),
         
-        ]);
-    }
+    //     ]);
+    // }
 }
