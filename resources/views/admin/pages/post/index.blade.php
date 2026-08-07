@@ -14,8 +14,6 @@
 
         <div class="card">
             <div class="card-body">
-                <!-- اضافه کردن ستون وضعیت و نمایش وضعیت‌ها -->
-
                 <div class="table-responsive">
                     <table class="table table-hover">
                         <thead>
@@ -32,9 +30,9 @@
                         <tbody>
                             @forelse($posts as $post)
                                 <tr>
-                                    <td>{{ $loop->iteration }}</td>
+                                    <td>{{ $post->id }}</td>
                                     <td>
-                                        <strong>{{ $post->title }}</strong>
+                                        <strong>{{ Str::limit($post->title, 10, '...') }}</strong>
                                         @if ($post->special)
                                             <span class="badge bg-danger ms-1">اسلاید</span>
                                         @endif
@@ -47,14 +45,12 @@
                                     <td>
                                         @if ($post->type === 'news')
                                             <span class="badge bg-info">خبر</span>
-                                            @elseif ($post->type === 'note')
+                                        @elseif ($post->type === 'note')
                                             <span class="badge bg-success">یادداشت</span>
-                                            @else
+                                        @else
                                             <span class="badge bg-secondary">مصاحبه</span>
                                         @endif
-                                     
                                     </td>
-                                   
                                     <td>{{ $post->published_at ? verta($post->published_at)->format('Y/m/d') : '-' }}</td>
                                     <td>
                                         <div class="dropdown">
@@ -69,8 +65,7 @@
                                                     </a>
                                                 @endif
 
-                                                @can('manage-posts')
-                                                    {{-- فقط ادمین‌ها --}}
+                                                @if ($post->canEdit())
                                                     @if ($post->status === 'pending')
                                                         <button class="dropdown-item text-success"
                                                             onclick="approvePost({{ $post->id }})">
@@ -81,20 +76,20 @@
                                                             <i class="bx bx-x me-1"></i> رد
                                                         </button>
                                                     @endif
-                                                @endcan
+                                                @endif
 
-                                                @can('manage-posts')
-                                                    @if ($post->status === 'approved' || $post->status === 'draft')
+                                                @if ($post->canEdit())
+                                                    @if ($post->status === 'approved' || $post->status === 'draft' || $post->status === 'pending')
                                                         <button class="dropdown-item text-primary"
                                                             onclick="publishPost({{ $post->id }})">
                                                             <i class="bx bx-upload me-1"></i> انتشار
                                                         </button>
                                                     @endif
-                                                @endcan
+                                                @endif
 
                                                 @if ($post->canDelete())
-                                                    <form action="{{ route('admin.posts.destroy', $post) }}"
-                                                        method="POST">
+                                                    <form action="{{ route('admin.posts.destroy', $post) }}" method="POST"
+                                                        style="display: inline;">
                                                         @csrf
                                                         @method('DELETE')
                                                         <button type="submit" class="dropdown-item text-danger"
@@ -115,31 +110,45 @@
                         </tbody>
                     </table>
                 </div>
-
-                {{ $posts->links() }}
+                    <div class="d-flex justify-content-center mt-4">
+                        {{ $posts->links('pagination::bootstrap5') }}
+                    </div>
             </div>
         </div>
     </div>
 
-    <!-- مودال رد خبر -->
-    <div class="modal fade" id="rejectModal" tabindex="-1">
-        <div class="modal-dialog">
+    <!-- مودال رد خبر (خارج از dropdown و جدول) -->
+    <div class="modal fade" id="rejectModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">رد پست</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <h5 class="modal-title">
+                        <i class="bx bx-x-circle text-danger me-2"></i>
+                        رد خبر
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <form id="rejectForm" method="POST">
                     @csrf
                     <div class="modal-body">
                         <div class="mb-3">
-                            <label class="form-label">دلیل رد <span class="text-danger">*</span></label>
-                            <textarea name="rejection_reason" class="form-control" rows="3" required></textarea>
+                            <label class="form-label fw-bold">
+                                دلیل رد خبر <span class="text-danger">*</span>
+                            </label>
+                            <textarea name="rejection_reason" id="rejection_reason"
+                                class="form-control @error('rejection_reason') is-invalid @enderror" rows="4"
+                                placeholder="دلیل رد خبر را وارد کنید..." required></textarea>
+                            @error('rejection_reason')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                            <small class="text-muted">این دلیل برای نویسنده نمایش داده می‌شود</small>
                         </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">انصراف</button>
-                        <button type="submit" class="btn btn-danger">رد پست</button>
+                        <button type="submit" class="btn btn-danger">
+                            <i class="bx bx-x me-1"></i> رد خبر
+                        </button>
                     </div>
                 </form>
             </div>
@@ -148,46 +157,14 @@
 @endsection
 
 @push('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        function toggleSpecial(id) {
-            Swal.fire({
-                title: 'آیا مطمئن هستید؟',
-                text: 'این خبر به عنوان اسلاید ویژه نمایش داده خواهد شد',
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'بله',
-                cancelButtonText: 'انصراف'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    $.ajax({
-                        url: `/admin/posts/${id}/toggle-special`,
-                        type: 'POST',
-                        data: {
-                            _token: '{{ csrf_token() }}'
-                        },
-                        success: function(response) {
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'موفق!',
-                                text: response.message,
-                                timer: 1500
-                            }).then(() => {
-                                location.reload();
-                            });
-                        },
-                        error: function(xhr) {
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'خطا!',
-                                text: xhr.responseJSON?.message || 'خطا در تغییر وضعیت ویژه'
-                            });
-                        }
-                    });
-                }
-            });
-        }
+        // تنظیم CSRF Token برای درخواست‌های Ajax
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            }
+        });
 
         function approvePost(id) {
             Swal.fire({
@@ -202,17 +179,15 @@
             }).then((result) => {
                 if (result.isConfirmed) {
                     $.ajax({
-                        url: `/admin/posts/${id}/approve`,
+                        url: '{{ route('admin.posts.approve', ':id') }}'.replace(':id', id),
                         type: 'POST',
-                        data: {
-                            _token: '{{ csrf_token() }}'
-                        },
                         success: function(response) {
                             Swal.fire({
                                 icon: 'success',
                                 title: 'موفق!',
-                                text: response.message,
-                                timer: 1500
+                                text: response.message || 'خبر با موفقیت تایید شد.',
+                                timer: 1500,
+                                showConfirmButton: false
                             }).then(() => {
                                 location.reload();
                             });
@@ -221,7 +196,8 @@
                             Swal.fire({
                                 icon: 'error',
                                 title: 'خطا!',
-                                text: xhr.responseJSON?.message || 'خطا در تایید خبر'
+                                text: xhr.responseJSON?.message || 'خطا در تایید خبر',
+                                confirmButtonColor: '#d33'
                             });
                         }
                     });
@@ -230,11 +206,108 @@
         }
 
         function rejectPost(id) {
-            const modal = new bootstrap.Modal(document.getElementById('rejectModal'));
+            // تنظیم اکشن فرم
             const form = document.getElementById('rejectForm');
-            form.action = `/admin/posts/${id}/reject`;
+            form.action = '{{ route('admin.posts.reject', ':id') }}'.replace(':id', id);
+
+            // پاک کردن مقدار قبلی
+            document.getElementById('rejection_reason').value = '';
+            document.getElementById('rejection_reason').classList.remove('is-invalid');
+
+            // نمایش مودال
+            const modal = new bootstrap.Modal(document.getElementById('rejectModal'));
             modal.show();
         }
+
+        // ارسال فرم رد با Ajax (به جای submit معمولی)
+        document.getElementById('rejectForm')?.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const reason = document.getElementById('rejection_reason').value.trim();
+
+            if (!reason) {
+                document.getElementById('rejection_reason').classList.add('is-invalid');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'خطا!',
+                    text: 'لطفاً دلیل رد را وارد کنید',
+                    confirmButtonColor: '#d33'
+                });
+                return;
+            }
+
+            if (reason.length < 5) {
+                document.getElementById('rejection_reason').classList.add('is-invalid');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'خطا!',
+                    text: 'دلیل رد باید حداقل ۵ کاراکتر باشد',
+                    confirmButtonColor: '#d33'
+                });
+                return;
+            }
+
+            // بستن مودال قبل از نمایش SweetAlert
+            const modalElement = document.getElementById('rejectModal');
+            const modal = bootstrap.Modal.getInstance(modalElement);
+            if (modal) {
+                modal.hide();
+            }
+
+            Swal.fire({
+                title: 'آیا مطمئن هستید؟',
+                text: 'این خبر با دلیل ذکر شده رد خواهد شد',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'بله، رد کن',
+                cancelButtonText: 'انصراف'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const form = document.getElementById('rejectForm');
+                    const formData = new FormData(form);
+
+                    $.ajax({
+                        url: form.action,
+                        type: 'POST',
+                        data: formData,
+                        processData: false,
+                        contentType: false,
+                        success: function(response) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'موفق!',
+                                text: response.message || 'خبر با موفقیت رد شد.',
+                                timer: 1500,
+                                showConfirmButton: false
+                            }).then(() => {
+                                location.reload();
+                            });
+                        },
+                        error: function(xhr) {
+                            let errorMsg = xhr.responseJSON?.message || 'خطا در رد خبر';
+                            if (xhr.status === 422) {
+                                const errors = xhr.responseJSON.errors;
+                                if (errors.rejection_reason) {
+                                    errorMsg = errors.rejection_reason[0];
+                                }
+                            }
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'خطا!',
+                                text: errorMsg,
+                                confirmButtonColor: '#d33'
+                            });
+                        }
+                    });
+                } else {
+                    // اگر کاربر انصراف داد، مودال را دوباره باز کن
+                    const modal = new bootstrap.Modal(document.getElementById('rejectModal'));
+                    modal.show();
+                }
+            });
+        });
 
         function publishPost(id) {
             Swal.fire({
@@ -249,17 +322,15 @@
             }).then((result) => {
                 if (result.isConfirmed) {
                     $.ajax({
-                        url: `/admin/posts/${id}/publish`,
+                        url: '{{ route('admin.posts.publish', ':id') }}'.replace(':id', id),
                         type: 'POST',
-                        data: {
-                            _token: '{{ csrf_token() }}'
-                        },
                         success: function(response) {
                             Swal.fire({
                                 icon: 'success',
                                 title: 'موفق!',
-                                text: response.message,
-                                timer: 1500
+                                text: response.message || 'خبر با موفقیت منتشر شد.',
+                                timer: 1500,
+                                showConfirmButton: false
                             }).then(() => {
                                 location.reload();
                             });
@@ -268,7 +339,8 @@
                             Swal.fire({
                                 icon: 'error',
                                 title: 'خطا!',
-                                text: xhr.responseJSON?.message || 'خطا در انتشار خبر'
+                                text: xhr.responseJSON?.message || 'خطا در انتشار خبر',
+                                confirmButtonColor: '#d33'
                             });
                         }
                     });

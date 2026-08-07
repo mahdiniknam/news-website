@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Controllers\Admin;
+namespace App\Http\Controllers\Author;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\StorePostRequest;
-use App\Http\Requests\UpdatePostRequest;
+use App\Http\Requests\Author\StorePostRequest;
+use App\Http\Requests\Author\UpdatePostRequest;
 use App\Models\Category;
 use App\Models\Post;
 use App\Models\Tag;
@@ -14,37 +14,36 @@ use Illuminate\Support\Facades\Storage;
 
 class PostController extends Controller
 {
+    /**
+     * نمایش لیست اخبار نویسنده
+     */
     public function index()
     {
         $user = Auth::guard('admin')->user();
-        $isAdmin = $user && ($user->hasRole('super-admin') || $user->hasRole('admin'));
 
-        if ($isAdmin) {
-            // ادمین همه اخبار را می‌بیند
-            $posts = Post::with(['author', 'category'])
-                ->latest()
-                ->paginate(15);
-        } else {
-            // نویسنده فقط اخبار خود را می‌بیند
-            $posts = Post::with(['author', 'category'])
-                ->where('author_id', $user->id)
-                ->latest()
-                ->paginate(15);
-        }
+        // نویسنده فقط اخبار خود را می‌بیند
+        $posts = Post::with(['author', 'category'])
+            ->where('author_id', $user->id)
+            ->latest()
+            ->paginate(15);
 
-        return view('admin.pages.post.index', compact('posts'));
+        return view('author.pages.post.index', compact('posts'));
     }
 
+    /**
+     * نمایش فرم ایجاد خبر
+     */
     public function create()
     {
         $categories = Category::where('status', 1)->ordered()->get();
-        $tags=Tag::where('status','active')->get();
-        $user = Auth::guard('admin')->user();
-        $isAdmin = $user && ($user->hasRole('super-admin') || $user->hasRole('admin'));
+        $tags = Tag::where('status', 'active')->get();
 
-        return view('admin.pages.post.create', compact('categories', 'isAdmin', 'tags'));
+        return view('author.pages.post.create', compact('categories', 'tags'));
     }
 
+    /**
+     * ذخیره خبر جدید
+     */
     public function store(StorePostRequest $request)
     {
         try {
@@ -59,25 +58,20 @@ class PostController extends Controller
             // تنظیم نویسنده
             $validatedData['author_id'] = Auth::guard('admin')->id();
 
-            // بررسی نقش کاربر برای تعیین وضعیت خودکار
-            $user = Auth::guard('admin')->user();
-            if ($user->hasRole('super-admin') || $user->hasRole('admin')) {
-                $validatedData['status'] = 'published';
-                $validatedData['published_at'] = now();
-            } else {
-                $validatedData['status'] = 'pending';
-            }
+            // وضعیت همیشه pending (در انتظار تایید)
+            $validatedData['status'] = 'pending';
 
             // ایجاد خبر
             $post = Post::create($validatedData);
 
-            $message = $post->status === 'published'
-                ? 'خبر با موفقیت ایجاد و منتشر شد.'
-                : 'خبر با موفقیت ایجاد شد و در انتظار تایید مدیر است.';
+            // مدیریت تگ‌ها (اگر تگ‌ها وجود داشته باشند)
+            if ($request->has('tags') && !empty($request->tags)) {
+                $post->tags()->sync($request->tags);
+            }
 
             return redirect()
-                ->route('admin.posts.index')
-                ->with('success', $message);
+                ->route('author.posts.index')
+                ->with('success', 'خبر با موفقیت ایجاد شد و در انتظار تایید مدیر است.');
         } catch (\Exception $e) {
             return redirect()
                 ->back()
@@ -86,29 +80,45 @@ class PostController extends Controller
         }
     }
 
+    /**
+     * نمایش فرم ویرایش خبر
+     */
     public function edit(Post $post)
     {
         $user = Auth::guard('admin')->user();
-        $isAdmin = $user && ($user->hasRole('super-admin') || $user->hasRole('admin'));
 
-        // بررسی دسترسی
-        if (!$isAdmin && $post->author_id != $user->id) {
+        // بررسی دسترسی: نویسنده فقط می‌تواند خبرهای خود را ویرایش کند
+        if ($post->author_id != $user->id) {
             abort(403, 'شما دسترسی به ویرایش این خبر ندارید.');
         }
 
+        // فقط خبرهای با وضعیت draft, pending, rejected قابل ویرایش هستند
+        if (!in_array($post->status, ['draft', 'pending', 'rejected'])) {
+            abort(403, 'این خبر قابل ویرایش نیست.');
+        }
+
         $categories = Category::where('status', 1)->ordered()->get();
-        return view('admin.pages.post.edit', compact('post', 'categories', 'isAdmin'));
+        $tags = Tag::where('status', 'active')->get();
+
+        return view('author.pages.post.edit', compact('post', 'categories', 'tags'));
     }
 
+    /**
+     * به‌روزرسانی خبر
+     */
     public function update(UpdatePostRequest $request, Post $post)
     {
         try {
-            // بررسی دسترسی
             $user = Auth::guard('admin')->user();
-            $isAdmin = $user && ($user->hasRole('super-admin') || $user->hasRole('admin'));
 
-            if (!$isAdmin && $post->author_id != $user->id) {
+            // بررسی دسترسی
+            if ($post->author_id != $user->id) {
                 abort(403, 'شما دسترسی به ویرایش این خبر ندارید.');
+            }
+
+            // فقط خبرهای با وضعیت draft, pending, rejected قابل ویرایش هستند
+            if (!in_array($post->status, ['draft', 'pending', 'rejected'])) {
+                abort(403, 'این خبر قابل ویرایش نیست.');
             }
 
             $validatedData = $request->validated();
@@ -131,9 +141,14 @@ class PostController extends Controller
             // به‌روزرسانی خبر
             $post->update($validatedData);
 
+            // مدیریت تگ‌ها
+            if ($request->has('tags')) {
+                $post->tags()->sync($request->tags);
+            }
+
             return redirect()
-                ->route('admin.posts.index')
-                ->with('success', 'خبر با موفقیت ویرایش شد.');
+                ->route('author.posts.index')
+                ->with('success', 'خبر با موفقیت ویرایش شد و مجدداً در انتظار تایید است.');
         } catch (\Exception $e) {
             return redirect()
                 ->back()
@@ -142,15 +157,22 @@ class PostController extends Controller
         }
     }
 
+    /**
+     * حذف خبر
+     */
     public function destroy(Post $post)
     {
         try {
-            // بررسی دسترسی
             $user = Auth::guard('admin')->user();
-            $isAdmin = $user && ($user->hasRole('super-admin') || $user->hasRole('admin'));
 
-            if (!$isAdmin && $post->author_id != $user->id) {
+            // بررسی دسترسی
+            if ($post->author_id != $user->id) {
                 abort(403, 'شما دسترسی به حذف این خبر ندارید.');
+            }
+
+            // فقط خبرهای با وضعیت draft, pending, rejected قابل حذف هستند
+            if (!in_array($post->status, ['draft', 'pending', 'rejected'])) {
+                abort(403, 'این خبر قابل حذف نیست.');
             }
 
             // حذف تصویر
@@ -161,7 +183,7 @@ class PostController extends Controller
             $post->delete();
 
             return redirect()
-                ->back()
+                ->route('author.posts.index')
                 ->with('success', 'خبر با موفقیت حذف شد.');
         } catch (\Exception $e) {
             return redirect()
@@ -170,66 +192,40 @@ class PostController extends Controller
         }
     }
 
-    // متدهای تایید و رد
-    public function approve(Post $post)
+    /**
+     * نمایش خبر (برای مشاهده)
+     */
+    public function show(Post $post)
     {
-        try {
-            $post->approve(Auth::guard('admin')->id());
-            return redirect()
-                ->back()
-                ->with('success', 'خبر با موفقیت تایید شد.');
-        } catch (\Exception $e) {
-            return redirect()
-                ->back()
-                ->with('error', 'خطا در تایید خبر: ' . $e->getMessage());
+        $user = Auth::guard('admin')->user();
+
+        // بررسی دسترسی
+        if ($post->author_id != $user->id) {
+            abort(403, 'شما دسترسی به مشاهده این خبر ندارید.');
         }
+
+        return view('author.pages.post.show', compact('post'));
     }
 
-    public function reject(Request $request, Post $post)
+
+    public function showRejectionReason(Post $post)
     {
-        try {
-            $request->validate([
-                'rejection_reason' => 'required|string|max:500',
-            ]);
-
-            $post->reject($request->rejection_reason);
-            return redirect()
-                ->back()
-                ->with('success', 'خبر با موفقیت رد شد.');
-        } catch (\Exception $e) {
-            return redirect()
-                ->back()
-                ->with('error', 'خطا در رد خبر: ' . $e->getMessage());
+        if ($post->status !== 'rejected' || empty($post->rejection_reason)) {
+            return response()->json([
+                'message' => 'دلیلی برای رد وجود ندارد'
+            ], 404);
         }
-    }
 
-    public function publish(Post $post)
-    {
-        try {
-            $post->publish();
-            return redirect()
-                ->back()
-                ->with('success', 'خبر با موفقیت منتشر شد.');
-        } catch (\Exception $e) {
-            return redirect()
-                ->back()
-                ->with('error', 'خطا در انتشار خبر: ' . $e->getMessage());
+        // دریافت نام تایید کننده (اگر وجود داشته باشد)
+        $approver = null;
+        if ($post->approved_by) {
+            $approver = \App\Models\Admin::find($post->approved_by);
         }
-    }
 
-    public function toggleSpecial(Post $post)
-    {
-        try {
-            $post->special = !$post->special;
-            $post->save();
-
-            return redirect()
-                ->back()
-                ->with('success', $post->special ? 'خبر به عنوان اسلاید ویژه انتخاب شد.' : 'خبر از حالت اسلاید ویژه خارج شد.');
-        } catch (\Exception $e) {
-            return redirect()
-                ->back()
-                ->with('error', 'خطا در تغییر وضعیت ویژه: ' . $e->getMessage());
-        }
+        return response()->json([
+            'reason' => $post->rejection_reason,
+            'rejected_at' => $post->updated_at ? verta($post->updated_at)->format('Y/m/d H:i') : '-',
+            'approver' => $approver ? $approver->name : 'نامشخص'
+        ]);
     }
 }

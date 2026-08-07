@@ -4,7 +4,7 @@
                 <span class="app-brand-logo demo">
                     <img src="../../assets/img/branding/logo.png" alt="لوگو" width="26" height="26">
                 </span>
-                <span class="app-brand-text demo menu-text fw-bold ms-2">دیده بان شهر</span>
+                <span class="app-brand-text demo menu-text fw-bold ms-2">دید بان شهر</span>
             </a>
 
             <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto">
@@ -22,77 +22,26 @@
             <!-- Apps & Pages -->
 
             <li class="menu-item">
-                <a href="{{ route('admin.show.dashboard') }}" class="menu-link">
+                <a href="{{ route('author.show.dashboard') }}" class="menu-link">
                     <i class="menu-icon tf-icons bx bx-home-circle"></i>
-                    <div data-i18n="Dashboards"> داشبورد خبرنگار</div>
+                    <div> داشبورد خبرنگار</div>
                 </a>
             </li>
-            @role('super-admin')
+        
+            @role('author')
                 <li class="menu-item">
                     <a href="javascript:void(0);" class="menu-link menu-toggle">
                         <i class="menu-icon tf-icons bx bx-user"></i>
-                        <div data-i18n="Users">کاربران</div>
+                        <div>پست ها</div>
                     </a>
                     <ul class="menu-sub">
                         <li class="menu-item">
-                            <a href="{{ route('admin.admins.index') }}" class="menu-link">
-                                <div data-i18n="List">لیست</div>
-                            </a>
-                        </li>
-                        <li class="menu-item">
-                            <a href="{{ route('admin.admins.create') }}" class="menu-link">
-                                <div>ایجاد</div>
-                            </a>
-                        </li>
-                    </ul>
-                </li>
-            @endrole
-            @role('super-admin')
-                <li class="menu-item {{ request()->routeIs('admin.roles.*') ? 'active open' : '' }}">
-                    <a href="javascript:void(0);" class="menu-link menu-toggle">
-                        <i class="menu-icon tf-icons bx bx-check-shield"></i>
-                        <div>نقش‌ها و مجوزها</div>
-                    </a>
-
-                    <ul class="menu-sub">
-                        <li class="menu-item {{ request()->routeIs('admin.roles.*') ? 'active' : '' }}">
-                            <a href="{{ route('admin.roles.index') }}" class="menu-link">
-                                <div>نقش‌ها</div>
-                            </a>
-                        </li>
-                    </ul>
-                </li>
-            @endrole
-            @role('super-admin')
-                <li class="menu-item">
-                    <a href="{{ route('admin.tags.index') }}" class="menu-link">
-                        <i class="menu-icon tf-icons bx bx-home-circle"></i>
-                        <div>تگ ها</div>
-                    </a>
-                </li>
-            @endrole
-            @role('super-admin')
-                <li class="menu-item">
-                    <a href="{{ route('admin.categories.index') }}" class="menu-link">
-                        <i class="menu-icon tf-icons bx bx-home-circle"></i>
-                        <div>دسته بندی ها</div>
-                    </a>
-                </li>
-            @endrole
-            @role('super-admin' || 'author')
-                <li class="menu-item">
-                    <a href="javascript:void(0);" class="menu-link menu-toggle">
-                        <i class="menu-icon tf-icons bx bx-user"></i>
-                        <div>خبر ها</div>
-                    </a>
-                    <ul class="menu-sub">
-                        <li class="menu-item">
-                            <a href="{{ route('admin.posts.index') }}" class="menu-link">
+                            <a href="{{ route('author.posts.index') }}" class="menu-link">
                                 <div>لیست</div>
                             </a>
                         </li>
                         <li class="menu-item">
-                            <a href="{{ route('admin.posts.create') }}" class="menu-link">
+                            <a href="{{ route('author.posts.create') }}" class="menu-link">
                                 <div>ایجاد</div>
                             </a>
                         </li>

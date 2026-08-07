@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Admin\Auth;
+namespace App\Http\Controllers\Author\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AuthorAuthRequest;
@@ -42,6 +42,6 @@ class LoginController extends Controller
         $request->session()->regenerateToken();
 
         // ریدایرکت به صفحه لاگین با پیام
-        return redirect()->route('admin.login')->with('success', 'با موفقیت خارج شدید.');
+        return redirect()->route('author.login')->with('success', 'با موفقیت خارج شدید.');
     }
 }

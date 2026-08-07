@@ -1,12 +1,12 @@
-@extends('admin.layout.master')
+@extends('author.layout.master')
 
-@section('title', 'مدیریت پست')
+@section('author-title', 'مدیریت پست')
 
-@section('admin-content')
+@section('author-content')
     <div class="container-xxl flex-grow-1 container-p-y">
         <div class="mb-4 d-flex justify-content-between align-items-center">
             <h4 class="mb-1">مدیریت پست</h4>
-            <a href="{{ route('admin.posts.create') }}" class="btn btn-primary">
+            <a href="{{ route('author.posts.create') }}" class="btn btn-primary">
                 <i class="bx bx-plus me-1"></i>
                 خبر جدید
             </a>
@@ -14,8 +14,6 @@
 
         <div class="card">
             <div class="card-body">
-                <!-- اضافه کردن ستون وضعیت و نمایش وضعیت‌ها -->
-
                 <div class="table-responsive">
                     <table class="table table-hover">
                         <thead>
@@ -32,9 +30,9 @@
                         <tbody>
                             @forelse($posts as $post)
                                 <tr>
-                                    <td>{{ $loop->iteration }}</td>
+                                    <td>{{ $post->id }}</td>
                                     <td>
-                                        <strong>{{ $post->title }}</strong>
+                                        <strong>{{ Str::limit($post->title,10,'...') }}</strong>
                                         @if ($post->special)
                                             <span class="badge bg-danger ms-1">اسلاید</span>
                                         @endif
@@ -47,14 +45,12 @@
                                     <td>
                                         @if ($post->type === 'news')
                                             <span class="badge bg-info">خبر</span>
-                                            @elseif ($post->type === 'note')
+                                        @elseif ($post->type === 'note')
                                             <span class="badge bg-success">یادداشت</span>
-                                            @else
+                                        @else
                                             <span class="badge bg-secondary">مصاحبه</span>
                                         @endif
-                                     
                                     </td>
-                                   
                                     <td>{{ $post->published_at ? verta($post->published_at)->format('Y/m/d') : '-' }}</td>
                                     <td>
                                         <div class="dropdown">
@@ -63,37 +59,22 @@
                                                 عملیات
                                             </button>
                                             <div class="dropdown-menu">
-                                                @if ($post->canEdit())
-                                                    <a href="{{ route('admin.posts.edit', $post) }}" class="dropdown-item">
+                                                
+                                                    <a href="{{ route('author.posts.edit', $post) }}" class="dropdown-item">
                                                         <i class="bx bx-edit me-1"></i> ویرایش
                                                     </a>
+                                             
+
+                                                {{-- نمایش دلیل رد با SweetAlert --}}
+                                                @if ($post->status === 'rejected' && $post->rejection_reason)
+                                                    <button class="dropdown-item text-danger"
+                                                        onclick="showRejectionReason({{ $post->id }})">
+                                                        <i class="bx bx-info-circle me-1"></i> نمایش دلیل رد
+                                                    </button>
                                                 @endif
 
-                                                @can('manage-posts')
-                                                    {{-- فقط ادمین‌ها --}}
-                                                    @if ($post->status === 'pending')
-                                                        <button class="dropdown-item text-success"
-                                                            onclick="approvePost({{ $post->id }})">
-                                                            <i class="bx bx-check me-1"></i> تایید
-                                                        </button>
-                                                        <button class="dropdown-item text-danger"
-                                                            onclick="rejectPost({{ $post->id }})">
-                                                            <i class="bx bx-x me-1"></i> رد
-                                                        </button>
-                                                    @endif
-                                                @endcan
-
-                                                @can('manage-posts')
-                                                    @if ($post->status === 'approved' || $post->status === 'draft')
-                                                        <button class="dropdown-item text-primary"
-                                                            onclick="publishPost({{ $post->id }})">
-                                                            <i class="bx bx-upload me-1"></i> انتشار
-                                                        </button>
-                                                    @endif
-                                                @endcan
-
-                                                @if ($post->canDelete())
-                                                    <form action="{{ route('admin.posts.destroy', $post) }}"
+                                              
+                                                    <form action="{{ route('author.posts.destroy', $post) }}"
                                                         method="POST">
                                                         @csrf
                                                         @method('DELETE')
@@ -102,7 +83,7 @@
                                                             <i class="bx bx-trash me-1"></i> حذف
                                                         </button>
                                                     </form>
-                                                @endif
+                                                
                                             </div>
                                         </div>
                                     </td>
@@ -120,158 +101,90 @@
             </div>
         </div>
     </div>
-
-    <!-- مودال رد خبر -->
-    <div class="modal fade" id="rejectModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">رد پست</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <form id="rejectForm" method="POST">
-                    @csrf
-                    <div class="modal-body">
-                        <div class="mb-3">
-                            <label class="form-label">دلیل رد <span class="text-danger">*</span></label>
-                            <textarea name="rejection_reason" class="form-control" rows="3" required></textarea>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">انصراف</button>
-                        <button type="submit" class="btn btn-danger">رد پست</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
 @endsection
 
-@push('scripts')
+@push('author-scripts')
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        function toggleSpecial(id) {
+        // تنظیم CSRF Token
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            }
+        });
+
+        // نمایش دلیل رد با SweetAlert
+        function showRejectionReason(id) {
+            // نمایش لودینگ
             Swal.fire({
-                title: 'آیا مطمئن هستید؟',
-                text: 'این خبر به عنوان اسلاید ویژه نمایش داده خواهد شد',
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'بله',
-                cancelButtonText: 'انصراف'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    $.ajax({
-                        url: `/admin/posts/${id}/toggle-special`,
-                        type: 'POST',
-                        data: {
-                            _token: '{{ csrf_token() }}'
-                        },
-                        success: function(response) {
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'موفق!',
-                                text: response.message,
-                                timer: 1500
-                            }).then(() => {
-                                location.reload();
-                            });
-                        },
-                        error: function(xhr) {
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'خطا!',
-                                text: xhr.responseJSON?.message || 'خطا در تغییر وضعیت ویژه'
-                            });
-                        }
+                title: 'در حال دریافت اطلاعات...',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            // دریافت دلیل رد با Ajax
+            $.ajax({
+                url: '{{ route('author.posts.rejection-reason', ':id') }}'.replace(':id', id),
+                type: 'GET',
+                success: function(response) {
+                    Swal.fire({
+                        icon: 'info',
+                        title: 'دلیل رد خبر',
+                        html: `
+                            <div class="text-start">
+                                <div class="alert alert-danger p-3 rounded">
+                                    <strong class="d-block mb-2">📌 دلیل رد:</strong>
+                                    <p class="mb-0">${response.reason || 'دلیلی ثبت نشده است'}</p>
+                                </div>
+                                <div class="d-flex justify-content-between text-muted small mt-3">
+                                    <span>
+                                        <i class="bx bx-calendar me-1"></i>
+                                        تاریخ رد: ${response.rejected_at || '-'}
+                                    </span>
+                                    <span>
+                                        <i class="bx bx-user me-1"></i>
+                                        تایید کننده: مدیر سایت
+                                    </span>
+                                </div>
+                            </div>
+                        `,
+                        confirmButtonColor: '#3085d6',
+                        confirmButtonText: 'تایید'
+                    });
+                },
+                error: function(xhr) {
+                    let errorMsg = 'خطا در دریافت دلیل رد';
+                    if (xhr.status === 404) {
+                        errorMsg = 'دلیلی برای رد این خبر یافت نشد';
+                    }
+                    
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'خطا!',
+                        text: errorMsg,
+                        confirmButtonColor: '#d33',
+                        confirmButtonText: 'تایید'
                     });
                 }
             });
         }
 
-        function approvePost(id) {
+        // تابع حذف با SweetAlert (به جای confirm معمولی)
+        function deletePost(id, form) {
             Swal.fire({
                 title: 'آیا مطمئن هستید؟',
-                text: 'این خبر تایید خواهد شد',
-                icon: 'question',
+                text: 'این خبر به طور کامل حذف خواهد شد!',
+                icon: 'warning',
                 showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'بله، تایید کن',
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'بله، حذف شود',
                 cancelButtonText: 'انصراف'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    $.ajax({
-                        url: `/admin/posts/${id}/approve`,
-                        type: 'POST',
-                        data: {
-                            _token: '{{ csrf_token() }}'
-                        },
-                        success: function(response) {
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'موفق!',
-                                text: response.message,
-                                timer: 1500
-                            }).then(() => {
-                                location.reload();
-                            });
-                        },
-                        error: function(xhr) {
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'خطا!',
-                                text: xhr.responseJSON?.message || 'خطا در تایید خبر'
-                            });
-                        }
-                    });
-                }
-            });
-        }
-
-        function rejectPost(id) {
-            const modal = new bootstrap.Modal(document.getElementById('rejectModal'));
-            const form = document.getElementById('rejectForm');
-            form.action = `/admin/posts/${id}/reject`;
-            modal.show();
-        }
-
-        function publishPost(id) {
-            Swal.fire({
-                title: 'آیا مطمئن هستید؟',
-                text: 'این خبر منتشر خواهد شد',
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'بله، انتشار',
-                cancelButtonText: 'انصراف'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    $.ajax({
-                        url: `/admin/posts/${id}/publish`,
-                        type: 'POST',
-                        data: {
-                            _token: '{{ csrf_token() }}'
-                        },
-                        success: function(response) {
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'موفق!',
-                                text: response.message,
-                                timer: 1500
-                            }).then(() => {
-                                location.reload();
-                            });
-                        },
-                        error: function(xhr) {
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'خطا!',
-                                text: xhr.responseJSON?.message || 'خطا در انتشار خبر'
-                            });
-                        }
-                    });
+                    form.submit();
                 }
             });
         }

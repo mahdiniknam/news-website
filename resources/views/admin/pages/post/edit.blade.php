@@ -111,14 +111,6 @@
                                     id="is_featured" {{ old('is_featured', $post->is_featured) ? 'checked' : '' }}>
                                 <label class="form-check-label" for="is_featured">خبر ویژه</label>
                             </div>
-
-                            <div class="form-check form-switch">
-                                <input type="hidden" name="special" value="0">
-                                <input class="form-check-input" type="checkbox" name="special" value="1" id="special"
-                                    {{ old('special', $post->special) ? 'checked' : '' }}>
-                                <label class="form-check-label" for="special">خبر ویژه اسلایدی</label>
-                            </div>
-                        </div>
                     </div>
 
                     <!-- متا تگ‌ها -->

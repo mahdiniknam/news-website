@@ -7,6 +7,9 @@ use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\PostController;
 use App\Http\Controllers\Admin\TagController;
+use App\Http\Controllers\Author\Auth\LoginController as AuthLoginController;
+use App\Http\Controllers\Author\DashboardController as AuthorDashboardController;
+use App\Http\Controllers\Author\PostController as AuthorPostController;
 use App\Http\Controllers\HomeController;
 use Illuminate\Support\Facades\Route;
 
@@ -68,42 +71,58 @@ Route::prefix('didebaneshahr/admin')->name('admin.')->group(function () {
         });
 
         Route::prefix('posts')->name('posts.')->group(function () {
-            Route::get('/', [PostController::class, 'index'])->name('index');
+            // مسیرهای بدون پارامتر (ثابت) باید اول تعریف شوند
             Route::get('/create', [PostController::class, 'create'])->name('create');
             Route::post('/store', [PostController::class, 'store'])->name('store');
-            Route::get('/edit/{post}', [PostController::class, 'edit'])->name('edit');
-            Route::put('/update/{post}', [PostController::class, 'update'])->name('update');
-            Route::delete('/destroy/{post}', [PostController::class, 'destroy'])->name('destroy');
+            Route::get('/', [PostController::class, 'index'])->name('index');
+
+            // مسیرهای با پارامتر {post} (متغیر) باید بعد از مسیرهای ثابت تعریف شوند
+            Route::post('{post}/approve', [PostController::class, 'approve'])->name('approve');
+            Route::post('{post}/reject', [PostController::class, 'reject'])->name('reject');
+            Route::post('{post}/publish', [PostController::class, 'publish'])->name('publish');
+            Route::get('{post}/rejection-reason', [PostController::class, 'showRejectionReason'])->name('rejection-reason');
+
+            // مسیرهای CRUD اصلی با {post} باید در انتها تعریف شوند
+            Route::get('edit/{post}', [PostController::class, 'edit'])->name('edit');
+            Route::put('update/{post}', [PostController::class, 'update'])->name('update');
+            Route::delete('destroy/{post}', [PostController::class, 'destroy'])->name('destroy');
         });
     });
 });
 
 
 
+
+
+
+
+
+
 Route::prefix('author')->name('author.')->group(function () {
 
     Route::middleware('guest:admin')->group(function () {
-        Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
-        Route::post('/login', [LoginController::class, 'loginWithPassword'])->name('login.post');
+        Route::get('/login', [AuthLoginController::class, 'showLoginForm'])->name('login');
+        Route::post('/login', [AuthLoginController::class, 'loginWithPassword'])->name('login.post');
 
-        Route::post('/login/verify', [LoginController::class, 'verifyLoginChallenge'])->name('login.verify');
+        Route::post('/login/verify', [AuthLoginController::class, 'verifyLoginChallenge'])->name('login.verify');
     });
 
-    Route::middleware('auth:author')->group(function () {
-        Route::get('/dashboard', [DashboardController::class, 'dashboard'])->name('show.dashboard');
+    Route::middleware('auth:admin')->group(function () {
+        Route::get('/dashboard', [AuthorDashboardController::class, 'dashboard'])->name('show.dashboard');
     });
 
-    Route::middleware('auth:author')->group(function () {
+    Route::middleware('auth:admin')->group(function () {
 
-        Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+        Route::post('/logout', [AuthLoginController::class, 'logout'])->name('logout');
 
         Route::prefix('posts')->name('posts.')->group(function () {
-            Route::get('/', [PostController::class, 'index'])->name('index');
-            Route::get('/create', [PostController::class, 'create'])->name('create');
-            Route::post('/store', [PostController::class, 'store'])->name('store');
-            Route::get('/edit/{post}', [PostController::class, 'edit'])->name('edit');
-            Route::put('/update/{post}', [PostController::class, 'update'])->name('update');
-            Route::delete('/destroy/{post}', [PostController::class, 'destroy'])->name('destroy');
+            Route::get('/', [AuthorPostController::class, 'index'])->name('index');
+            Route::get('/create', [AuthorPostController::class, 'create'])->name('create');
+            Route::post('/store', [AuthorPostController::class, 'store'])->name('store');
+            Route::get('/edit/{post}', [AuthorPostController::class, 'edit'])->name('edit');
+            Route::put('/update/{post}', [AuthorPostController::class, 'update'])->name('update');
+            Route::delete('/destroy/{post}', [AuthorPostController::class, 'destroy'])->name('destroy');
+            Route::get('{post}/rejection-reason', [AuthorPostController::class, 'showRejectionReason'])->name('rejection-reason');
         });
     });
 });

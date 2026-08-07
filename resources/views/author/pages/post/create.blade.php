@@ -1,8 +1,8 @@
-@extends('admin.layout.master')
+@extends('author.layout.master')
 
 @section('title', 'ایجاد خبر جدید')
 
-@section('admin-content')
+@section('author-content')
     <div class="container-xxl flex-grow-1 container-p-y">
         <div class="mb-4">
             <h4 class="mb-1">ایجاد خبر جدید</h4>
@@ -10,32 +10,26 @@
 
         <div class="card">
             <div class="card-body">
-                <form action="{{ route('admin.posts.store') }}" method="POST" enctype="multipart/form-data">
+                <form action="{{ route('author.posts.store') }}" method="POST" enctype="multipart/form-data">
                     @csrf
-
+                    @if ($errors->any())
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <h5 class="alert-heading">خطا!</h5>
+                            <ul class="mb-0">
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    @endif
                     <div class="row">
                         <!-- عنوان -->
                         <div class="col-md-8 mb-3">
-                            <label class="form-label">عنوان  <span class="text-danger">*</span></label>
+                            <label class="form-label">عنوان <span class="text-danger">*</span></label>
                             <input type="text" name="title" class="form-control @error('title') is-invalid @enderror"
                                 value="{{ old('title') }}" placeholder="عنوان را وارد کنید">
                             @error('title')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-
-                        <!-- وضعیت -->
-                        <div class="col-md-4 mb-3">
-                            <label class="form-label">وضعیت <span class="text-danger">*</span></label>
-                            <select name="status" class="form-select @error('status') is-invalid @enderror">
-                                <option value="">انتخاب وضعیت</option>
-                                @foreach (\App\Models\Post::statuses() as $key => $value)
-                                    <option value="{{ $key }}" {{ old('status') == $key ? 'selected' : '' }}>
-                                        {{ $value }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            @error('status')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
@@ -153,7 +147,7 @@
                                 <i class="bx bx-save me-1"></i>
                                 ذخیره خبر
                             </button>
-                            <a href="{{ route('admin.posts.index') }}" class="btn btn-outline-secondary">
+                            <a href="{{ route('author.posts.index') }}" class="btn btn-outline-secondary">
                                 <i class="bx bx-x me-1"></i>
                                 انصراف
                             </a>
@@ -165,8 +159,8 @@
     </div>
 @endsection
 
-@push('scripts')
- <script>
+@push('author-scripts')
+    <script>
         $(".select2").select2();
     </script>
     <script src="{{ asset('assets/js/tinymce/tinymce.min.js') }}"></script>

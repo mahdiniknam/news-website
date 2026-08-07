@@ -23,13 +23,13 @@ class PostController extends Controller
             // ادمین همه اخبار را می‌بیند
             $posts = Post::with(['author', 'category'])
                 ->latest()
-                ->paginate(15);
+                ->paginate(10);
         } else {
             // نویسنده فقط اخبار خود را می‌بیند
             $posts = Post::with(['author', 'category'])
                 ->where('author_id', $user->id)
                 ->latest()
-                ->paginate(15);
+                ->paginate(3);
         }
 
         return view('admin.pages.post.index', compact('posts'));
@@ -38,7 +38,7 @@ class PostController extends Controller
     public function create()
     {
         $categories = Category::where('status', 1)->ordered()->get();
-        $tags=Tag::where('status','active')->get();
+        $tags = Tag::where('status', 'active')->get();
         $user = Auth::guard('admin')->user();
         $isAdmin = $user && ($user->hasRole('super-admin') || $user->hasRole('admin'));
 
@@ -187,22 +187,56 @@ class PostController extends Controller
 
     public function reject(Request $request, Post $post)
     {
+
         try {
+
+        $admin=auth('admin')->user();
             $request->validate([
-                'rejection_reason' => 'required|string|max:500',
+                'rejection_reason' => 'required|string|min:5|max:500',
             ]);
 
-            $post->reject($request->rejection_reason);
+            // تغییر وضعیت به rejected
+            $post->status = 'rejected';
+            $post->rejection_reason = $request->rejection_reason;
+            
+            $post->save();
+
+            // اگر درخواست Ajax باشد
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'خبر با موفقیت رد شد.'
+                ]);
+            }
+
             return redirect()
                 ->back()
                 ->with('success', 'خبر با موفقیت رد شد.');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'خطا در اعتبارسنجی',
+                    'errors' => $e->errors()
+                ], 422);
+            }
+            throw $e;
         } catch (\Exception $e) {
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'خطا در رد خبر: ' . $e->getMessage()
+                ], 500);
+            }
+
             return redirect()
                 ->back()
                 ->with('error', 'خطا در رد خبر: ' . $e->getMessage());
         }
     }
 
+
+  
     public function publish(Post $post)
     {
         try {

@@ -24,14 +24,14 @@ class HomeController extends Controller
             ->where('status', 'published')
             ->where('type', 'news')
             ->latest('published_at')
-            ->paginate(8);
+            ->paginate(6);
 
         // یادداشت‌ها (با دسته‌بندی خاص یا اخبار کوتاه)
         $notes = Post::with('author')
             ->where('status', 'published')
             ->where('type', 'note') // فرض کنید نوع یادداشت‌ها "note" است
             ->latest('published_at')
-            ->limit(5)
+            ->limit(3)
             ->get();
 
         // مصاحبه‌ها
@@ -39,7 +39,7 @@ class HomeController extends Controller
             ->where('status', 'published')
             ->where('type', 'interview') // فرض کنید نوع مصاحبه‌ها "interview" است   
             ->latest('published_at')
-            ->limit(4)
+            ->limit(3)
             ->get();
 
         return view('home.index', compact('slides', 'news', 'notes', 'interviews'));

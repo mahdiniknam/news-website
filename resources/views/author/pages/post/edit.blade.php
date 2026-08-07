@@ -1,8 +1,8 @@
-@extends('admin.layout.master')
+@extends('author.layout.master')
 
-@section('title', 'ویرایش خبر')
+@section('author-title', 'ویرایش خبر')
 
-@section('admin-content')
+@section('author-content')
     <div class="container-xxl flex-grow-1 container-p-y">
         <div class="mb-4">
             <h4 class="mb-1">ویرایش خبر: {{ $post->title }}</h4>
@@ -10,7 +10,7 @@
 
         <div class="card">
             <div class="card-body">
-                <form action="{{ route('admin.posts.update', $post) }}" method="POST" enctype="multipart/form-data">
+                <form action="{{ route('author.posts.update', $post) }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     @method('PUT')
 
@@ -21,22 +21,6 @@
                             <input type="text" name="title" class="form-control @error('title') is-invalid @enderror"
                                 value="{{ old('title', $post->title) }}" placeholder="عنوان خبر را وارد کنید">
                             @error('title')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-
-                        <!-- وضعیت -->
-                        <div class="col-md-4 mb-3">
-                            <label class="form-label">وضعیت <span class="text-danger">*</span></label>
-                            <select name="status" class="form-select @error('status') is-invalid @enderror">
-                                @foreach (\App\Models\Post::statuses() as $key => $value)
-                                    <option value="{{ $key }}"
-                                        {{ old('status', $post->status) == $key ? 'selected' : '' }}>
-                                        {{ $value }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            @error('status')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
@@ -112,12 +96,6 @@
                                 <label class="form-check-label" for="is_featured">خبر ویژه</label>
                             </div>
 
-                            <div class="form-check form-switch">
-                                <input type="hidden" name="special" value="0">
-                                <input class="form-check-input" type="checkbox" name="special" value="1" id="special"
-                                    {{ old('special', $post->special) ? 'checked' : '' }}>
-                                <label class="form-check-label" for="special">خبر ویژه اسلایدی</label>
-                            </div>
                         </div>
                     </div>
 
@@ -164,7 +142,7 @@
     </div>
 @endsection
 
-@push('scripts')
+@push('author-scripts')
     <script src="https://cdn.ckeditor.com/4.25.2-lts/full/ckeditor.js"></script>
     <script>
         CKEDITOR.replace('content', {

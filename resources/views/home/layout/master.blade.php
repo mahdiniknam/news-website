@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'پایگاه خبری دیده بان شهر')</title>
+    <title>@yield('title', 'پایگاه خبری دید بان شهر')</title>
 
     <!-- Bootstrap 5 RTL -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css">
@@ -452,7 +452,10 @@
                     <h5 class="fw-bold mb-3"> {{ config('app.name') }}
                     </h5>
                     <p style="color: rgba(255,255,255,0.7); line-height: 1.8;">
-                       مطابق با فرمایش مقام معظم رهبری(مدظله) اگر ما نگاه کلانی به مسائل کشور، به آینده ی کشور و چالش هایی که فراروی ملت و کشور قرار دارد، نداشته باشیم، نه تنها نمی توانیم وظایف آینده را ترسیم کنیم، بلکه در فعالیت های فعلی هم احتمال سردرگمی وجود خواهد داشت و معتقدم لازمه تحول،اثر بخشی و کارآمدی نظام، تغییر نگاه کلان و همه جانبه به اداره امور کشور است.
+                        هیچ عبادتی بالاتر از خدمت به مردم نیست؛ چه در شهر، چه در بخش و چه در روستا. وظایفی که برای
+                        شوراها در قانون ذکر شده، همان وظایفی است که اگر شوراهای ما ان‌شاءاللَّه بتوانند این وظایف را به
+                        طور کامل به انجام برسانند، بسیاری از مشکلات جاری مردم برطرف خواهد شد و این موارد را قانون‌گذاران
+                        با دقّت در قانون اساسی و در قانون عرفی معیّن کرده‌اند.
                     </p>
                     {{-- <div class="social-icons">
                         <a href="#"><i class="fab fa-telegram"></i></a>
@@ -468,17 +471,17 @@
                         <li><a href="{{ route('news') }}">اخبار</a></li>
                         <li><a href="{{ route('notes') }}">یادداشت ها</a></li>
                         <li><a href="{{ route('interviews') }}">مصاحبه ها</a></li>
-                      
+
                     </ul>
                 </div>
 
                 <div class="col-md-4 mb-4">
                     <h5 class="fw-bold mb-3">ارتباط ها</h5>
                     <ul class="footer-links" style="padding: 0;">
-                        <li><a href="#">سایت رهبر شهید</a></li>
-                        <li><a href="#">شورای استان</a></li>
-                        <li><a href="#">شورای عالی</a></li>
-                        <li><a href="#">مدیریت شهری</a></li>
+                        <li><a href="https://shora.mashhad.ir/">شورای شهر</a></li>
+                        <li><a href="https://www.mashhad.ir/">مدیریت شهری</a></li>
+                        <li><a href="https://www.mashhad.khorasan.ir/">فرمانداری</a></li>
+                        <li><a href="https://www.khorasan.ir/">استانداری</a></li>
                     </ul>
                 </div>
             </div>
