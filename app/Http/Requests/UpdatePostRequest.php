@@ -49,10 +49,10 @@ class UpdatePostRequest extends FormRequest
         ];
     }
 
-    protected function prepareForValidation(): void
-    {
-        $this->merge([
-            'is_featured' => $this->has('is_featured'),
-        ]);
-    }
+    // protected function prepareForValidation(): void
+    // {
+    //     $this->merge([
+    //         'is_featured' => $this->has('is_featured'),
+    //     ]);
+    // }
 }

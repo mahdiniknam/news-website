@@ -157,7 +157,7 @@ class HomeController extends Controller
             ->ordered()
             ->get();
 
-        return view('home.searchResults', compact('posts', 'query', 'categories'));
+        return view('home.searchResult', compact('posts', 'query', 'categories'));
     }
 
 
