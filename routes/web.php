@@ -5,7 +5,9 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\PostController;
 use App\Http\Controllers\Admin\TagController;
+use App\Http\Controllers\HomeController;
 use Illuminate\Support\Facades\Route;
 
 // Route::get('/', function () {
@@ -61,5 +63,42 @@ Route::prefix('didebaneshahr/admin')->name('admin.')->group(function () {
             Route::put('/update/{category}', [CategoryController::class, 'update'])->name('update');
             Route::delete('/destroy/{category}', [CategoryController::class, 'destroy'])->name('destroy');
         });
+
+        Route::prefix('posts')->name('posts.')->group(function () {
+            Route::get('/', [PostController::class, 'index'])->name('index');
+              Route::get('/create', [PostController::class, 'create'])->name('create');
+            Route::post('/store', [PostController::class, 'store'])->name('store');
+            Route::get('/edit/{post}', [PostController::class, 'edit'])->name('edit');
+            Route::put('/update/{post}', [PostController::class, 'update'])->name('update');
+            Route::delete('/destroy/{post}', [PostController::class, 'destroy'])->name('destroy');
+        });
     });
 });
+
+
+// صفحه اصلی
+Route::get('/', [HomeController::class, 'index'])->name('home');
+
+// نمایش خبر
+Route::get('/news/{slug}', [HomeController::class, 'show'])->name('post.show');
+
+// لیست اخبار بر اساس دسته‌بندی
+Route::get('/category/{slug}', [CategoryController::class, 'show'])->name('category.show');
+
+// لیست همه اخبار
+Route::get('/news', [HomeController::class, 'allNews'])->name('news');
+
+// جستجو
+Route::get('/search', [HomeController::class, 'search'])->name('news.search');
+
+// آرشیو بر اساس تاریخ
+Route::get('/archive/{year}/{month}', [HomeController::class, 'archive'])->name('news.archive');
+
+// RSS Feed (اختیاری)
+Route::get('/feed', [HomeController::class, 'feed'])->name('news.feed');
+
+// لیست یادداشت‌ها
+Route::get('/notes', [HomeController::class, 'allNotes'])->name('notes');
+
+// لیست مصاحبه‌ها
+Route::get('/interviews', [HomeController::class, 'allInterviews'])->name('interviews');
