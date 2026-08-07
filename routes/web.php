@@ -29,6 +29,9 @@ Route::prefix('didebaneshahr/admin')->name('admin.')->group(function () {
 
     Route::middleware('auth:admin')->group(function () {
 
+        Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+
+
         Route::prefix('roles')->name('roles.')->group(function () {
             Route::get('/', [RoleController::class, 'index'])->name('index');
             Route::get('/create', [RoleController::class, 'create'])->name('create');
@@ -66,7 +69,7 @@ Route::prefix('didebaneshahr/admin')->name('admin.')->group(function () {
 
         Route::prefix('posts')->name('posts.')->group(function () {
             Route::get('/', [PostController::class, 'index'])->name('index');
-              Route::get('/create', [PostController::class, 'create'])->name('create');
+            Route::get('/create', [PostController::class, 'create'])->name('create');
             Route::post('/store', [PostController::class, 'store'])->name('store');
             Route::get('/edit/{post}', [PostController::class, 'edit'])->name('edit');
             Route::put('/update/{post}', [PostController::class, 'update'])->name('update');
@@ -74,6 +77,49 @@ Route::prefix('didebaneshahr/admin')->name('admin.')->group(function () {
         });
     });
 });
+
+
+
+Route::prefix('author')->name('author.')->group(function () {
+
+    Route::middleware('guest:admin')->group(function () {
+        Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
+        Route::post('/login', [LoginController::class, 'loginWithPassword'])->name('login.post');
+
+        Route::post('/login/verify', [LoginController::class, 'verifyLoginChallenge'])->name('login.verify');
+    });
+
+    Route::middleware('auth:author')->group(function () {
+        Route::get('/dashboard', [DashboardController::class, 'dashboard'])->name('show.dashboard');
+    });
+
+    Route::middleware('auth:author')->group(function () {
+
+        Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+
+        Route::prefix('posts')->name('posts.')->group(function () {
+            Route::get('/', [PostController::class, 'index'])->name('index');
+            Route::get('/create', [PostController::class, 'create'])->name('create');
+            Route::post('/store', [PostController::class, 'store'])->name('store');
+            Route::get('/edit/{post}', [PostController::class, 'edit'])->name('edit');
+            Route::put('/update/{post}', [PostController::class, 'update'])->name('update');
+            Route::delete('/destroy/{post}', [PostController::class, 'destroy'])->name('destroy');
+        });
+    });
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 // صفحه اصلی

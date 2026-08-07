@@ -56,10 +56,10 @@ class AdminRoleAndUserSeeder extends Seeder
 
         // ۵. ساخت اولین کاربر سوپر ادمین
         $superAdmin = Admin::firstOrCreate(
-            ['email' => 'admin@example.com'],
+            ['email' => 'wahedy@g.com'],
             [
-                'name' => 'مدیریت کل',
-                'password' => 'password', // به صورت خودکار به وسیله کستِ مدل هش می‌شود
+                'name' => 'سید حسین واحدی نسب',
+                'password' => 'Wahedy@2027', // به صورت خودکار به وسیله کستِ مدل هش می‌شود
             ]
         );
 
