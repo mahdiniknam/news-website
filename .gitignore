@@ -22,3 +22,6 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+# ابزار یک‌بارمصرف مایگریشن روی هاست — نباید به گیت برود
+/public/migrate-once.php
