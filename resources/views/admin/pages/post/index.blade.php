@@ -33,9 +33,6 @@
                                     <td>{{ $post->id }}</td>
                                     <td>
                                         <strong>{{ Str::limit($post->title, 10, '...') }}</strong>
-                                        @if ($post->special)
-                                            <span class="badge bg-danger ms-1">اسلاید</span>
-                                        @endif
                                         @if ($post->is_featured)
                                             <span class="badge bg-warning ms-1">ویژه</span>
                                         @endif

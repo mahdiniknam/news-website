@@ -35,4 +35,15 @@ return [
         ],
     ],
 
+    /*
+    | ربات بله (Bale messenger)
+    | توکن را از @BotFather در بله بگیرید: /newbot
+    */
+    'bale' => [
+        'bot_token' => env('BALE_BOT_TOKEN'),
+        'api_base' => env('BALE_API_BASE', 'https://tapi.bale.ai'),
+        'timeout' => env('BALE_TIMEOUT', 10),
+        'webhook_secret' => env('BALE_WEBHOOK_SECRET'),
+    ],
+
 ];

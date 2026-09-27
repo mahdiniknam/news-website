@@ -50,6 +50,8 @@ class UpdateAdminRequest extends FormRequest
             // وضعیت فعال - اختیاری، باید boolean باشد
             'is_active' => ['nullable', 'boolean'],
 
+            // شناسه بله دیگر از فرم گرفته نمی‌شود؛ اتصال فقط با کد احراز هویت از پنل خود کاربر انجام می‌شود
+
             // نقش‌ها - الزامی، حداقل یک نقش
             'roles' => ['required', 'array', 'min:1'],
             'roles.*' => ['exists:roles,name'], // بررسی وجود نقش در دیتابیس

@@ -5,8 +5,43 @@
 @section('author-content')
     <div class="container-xxl flex-grow-1 container-p-y">
         <div class="mb-4">
-            <h4 class="mb-1">ویرایش خبر: {{ $post->title }}</h4>
+            <h4 class="mb-1">ویرایش خبر: {{ Str::limit($post->title, 60) }}</h4>
         </div>
+
+        {{-- نمایش دلیل رد برای نویسنده --}}
+        @if ($post->status === 'rejected' && $post->rejection_reason)
+            <div class="alert alert-danger d-flex align-items-start mb-4" role="alert">
+                <i class="bx bx-error-circle fs-4 me-2"></i>
+                <div class="flex-grow-1">
+                    <h5 class="alert-heading mb-1">این خبر رد شده است</h5>
+                    <p class="mb-2">
+                        <strong>دلیل رد:</strong>
+                    </p>
+                    <p class="mb-2 fst-normal">{{ $post->rejection_reason }}</p>
+                    @if ($post->approver)
+                        <small class="text-muted">
+                            <i class="bx bx-user-check me-1"></i>
+                            بررسی‌کننده: {{ $post->approver->name }}
+                            @if ($post->updated_at)
+                                • {{ verta($post->updated_at)->format('Y/m/d H:i') }}
+                            @endif
+                        </small>
+                    @endif
+                    <hr>
+                    <p class="mb-0 small">
+                        <i class="bx bx-check-circle me-1"></i>
+                        پس از اصلاح، دکمه «بروزرسانی خبر» را بزنید تا خبر دوباره برای بررسی ارسال شود.
+                    </p>
+                </div>
+            </div>
+        @elseif ($post->status === 'pending')
+            <div class="alert alert-info d-flex align-items-center mb-4" role="alert">
+                <i class="bx bx-time-five fs-4 me-2"></i>
+                <div>
+                    این خبر در <strong>انتظار بررسی مدیر</strong> است. تا زمان بررسی، می‌توانید آن را ویرایش کنید.
+                </div>
+            </div>
+        @endif
 
         <div class="card">
             <div class="card-body">
@@ -42,6 +77,7 @@
                         </div>
                     </div>
 
+                    <div class="row">
                     <!-- دسته‌بندی -->
                     <div class="col-md-6 mb-3">
                         <label class="form-label">دسته‌بندی</label>
@@ -127,13 +163,19 @@
                     <!-- دکمه‌ها -->
                     <div class="col-12 mt-3">
                         <button type="submit" class="btn btn-primary">
-                            <i class="bx bx-save me-1"></i>
-                            بروزرسانی خبر
+                            <i class="bx bx-{{ $post->status === 'rejected' ? 'send' : 'save' }} me-1"></i>
+                            {{ $post->status === 'rejected' ? 'اصلاح و ارسال مجدد برای بررسی' : 'بروزرسانی خبر' }}
                         </button>
-                        <a href="{{ route('admin.posts.index') }}" class="btn btn-outline-secondary">
+                        <a href="{{ route('author.posts.index') }}" class="btn btn-outline-secondary">
                             <i class="bx bx-x me-1"></i>
                             انصراف
                         </a>
+                        @if ($post->status === 'rejected')
+                            <small class="d-block text-muted mt-2">
+                                <i class="bx bx-info-circle me-1"></i>
+                                با ذخیره، دلیل رد پاک می‌شود و خبر به وضعیت «در انتظار بررسی» برمی‌گردد.
+                            </small>
+                        @endif
                     </div>
             </div>
             </form>
@@ -181,8 +223,8 @@
             font_names: 'IRANSans;IRAN Sans;Arial;Times New Roman;Verdana;Tahoma;',
 
             // تنظیمات آپلود تصویر
-            filebrowserUploadUrl: '/admin/upload-image',
-            filebrowserImageUploadUrl: '/admin/upload-image',
+            filebrowserUploadUrl: '{{ route('editor.upload') }}',
+            filebrowserImageUploadUrl: '{{ route('editor.upload') }}',
             filebrowserUploadMethod: 'form'
         });
     </script>

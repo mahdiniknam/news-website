@@ -195,8 +195,8 @@
             font_names: 'IRANSans;IRAN Sans;Arial;Times New Roman;Verdana;Tahoma;',
 
             // تنظیمات آپلود تصویر
-            filebrowserUploadUrl: '/admin/upload-image',
-            filebrowserImageUploadUrl: '/admin/upload-image',
+            filebrowserUploadUrl: '{{ route('editor.upload') }}',
+            filebrowserImageUploadUrl: '{{ route('editor.upload') }}',
             filebrowserUploadMethod: 'form'
         });
     </script>

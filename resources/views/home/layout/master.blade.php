@@ -452,17 +452,12 @@
                     <h5 class="fw-bold mb-3"> {{ config('app.name') }}
                     </h5>
                     <p style="color: rgba(255,255,255,0.7); line-height: 1.8;">
-                        هیچ عبادتی بالاتر از خدمت به مردم نیست؛ چه در شهر، چه در بخش و چه در روستا. وظایفی که برای
-                        شوراها در قانون ذکر شده، همان وظایفی است که اگر شوراهای ما ان‌شاءاللَّه بتوانند این وظایف را به
-                        طور کامل به انجام برسانند، بسیاری از مشکلات جاری مردم برطرف خواهد شد و این موارد را قانون‌گذاران
-                        با دقّت در قانون اساسی و در قانون عرفی معیّن کرده‌اند.
+                        امروز مؤثرترین سلاح بین‌‌المللی علیه دشمنان و مخالفین، سلاح تبلیغات است؛ سلاح ارتباطات رسانه‌‌ای
+                        است. امروز این قویترینِ سلاح است و از بمب اتم هم بدتر و خطرناکتر است. این سلاح دشمن را شما در
+                        بلواهای بعد از انتخابات ندیدید؟ دشمن با همین سلاح، لحظه به لحظه، قضایای ما را دنبال میکرد و به
+                        کسانی که اهل شیطنت بودند، رهنمود میداد. «و انّ الشّیاطین لیوحون الی اولیائهم لیجادلوکم»؛ دائم به
+                        اولیاء خودشان ایحاء میکردند.
                     </p>
-                    {{-- <div class="social-icons">
-                        <a href="#"><i class="fab fa-telegram"></i></a>
-                        <a href="#"><i class="fab fa-instagram"></i></a>
-                        <a href="#"><i class="fab fa-aparat"></i></a>
-                        <a href="#"><i class="fab fa-youtube"></i></a>
-                    </div> --}}
                 </div>
 
                 <div class="col-md-4 mb-4">
@@ -483,7 +478,15 @@
                         <li><a href="https://www.mashhad.khorasan.ir/">فرمانداری</a></li>
                         <li><a href="https://www.khorasan.ir/">استانداری</a></li>
                     </ul>
+
+                    {{-- نماد اعتماد --}}
+                    <div class="trustseal-wrapper mt-4 text-center">
+                        <div id="div_eRasanehTrustseal_100871"></div>
+                    </div>
+
+
                 </div>
+
             </div>
 
             <div class="footer-copyright">
@@ -516,6 +519,10 @@
         });
     </script>
 
+    <script src="https://trustseal.e-rasaneh.ir/trustseal.js"></script>
+    <script>
+        eRasaneh_Trustseal(100871, true);
+    </script>
     @stack('scripts')
 </body>
 

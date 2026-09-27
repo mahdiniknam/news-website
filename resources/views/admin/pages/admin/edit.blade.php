@@ -131,6 +131,30 @@
                         </div>
                     </div>
 
+                    <!-- وضعیت اتصال بله -->
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            @if (filled($admin->bale_chat_id))
+                                <div class="alert alert-success d-flex align-items-center mb-0" role="alert">
+                                    <i class="bx bx-check-circle fs-4 me-2"></i>
+                                    <div class="flex-grow-1">
+                                        <strong>ربات بله متصل است</strong> —
+                                        شناسه گفتگو: <code dir="ltr">{{ $admin->bale_chat_id }}</code>
+                                    </div>
+                                </div>
+                            @else
+                                <div class="alert alert-info d-flex align-items-start mb-0" role="alert">
+                                    <i class="bx bx-message-square-dots fs-4 me-2"></i>
+                                    <div>
+                                        <strong>ربات بله متصل نیست.</strong>
+                                        خود کاربر باید از پنل خودش (بخش «اتصال ربات بله») کد یک‌بارمصرف بگیرد
+                                        و در ربات ارسال کند تا اتصال انجام شود.
+                                    </div>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+
                     <!-- ردیف چهارم: وضعیت فعال/غیرفعال -->
                     <div class="row">
                         <div class="col-md-6">

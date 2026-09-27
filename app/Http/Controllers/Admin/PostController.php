@@ -8,6 +8,7 @@ use App\Http\Requests\UpdatePostRequest;
 use App\Models\Category;
 use App\Models\Post;
 use App\Models\Tag;
+use App\Services\PostNotifier;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -171,21 +172,44 @@ class PostController extends Controller
     }
 
     // متدهای تایید و رد
-    public function approve(Post $post)
+    public function approve(Post $post, PostNotifier $notifier)
     {
         try {
+            if ($post->status !== 'pending') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'این خبر در وضعیت قابل تایید نیست.'
+                ], 422);
+            }
+
             $post->approve(Auth::guard('admin')->id());
+
+            // اطلاع‌رسانی تایید به خبرنگار از طریق ربات بله
+            try {
+                $notifier->notifyAuthorApproved($post);
+            } catch (\Throwable $e) {
+                report($e);
+            }
+
+            if (request()->ajax()) {
+                return response()->json(['success' => true, 'message' => 'خبر با موفقیت تایید شد.']);
+            }
+
             return redirect()
                 ->back()
                 ->with('success', 'خبر با موفقیت تایید شد.');
         } catch (\Exception $e) {
+            if (request()->ajax()) {
+                return response()->json(['success' => false, 'message' => 'خطا در تایید خبر'], 500);
+            }
+
             return redirect()
                 ->back()
                 ->with('error', 'خطا در تایید خبر: ' . $e->getMessage());
         }
     }
 
-    public function reject(Request $request, Post $post)
+    public function reject(Request $request, Post $post, PostNotifier $notifier)
     {
 
         try {
@@ -200,6 +224,13 @@ class PostController extends Controller
             $post->rejection_reason = $request->rejection_reason;
             
             $post->save();
+
+            // اطلاع‌رسانی رد + دلیل به خبرنگار از طریق ربات بله
+            try {
+                $notifier->notifyAuthorRejected($post);
+            } catch (\Throwable $e) {
+                report($e);
+            }
 
             // اگر درخواست Ajax باشد
             if ($request->ajax()) {
@@ -237,14 +268,37 @@ class PostController extends Controller
 
 
   
-    public function publish(Post $post)
+    public function publish(Post $post, PostNotifier $notifier)
     {
         try {
+            if (in_array($post->status, ['rejected'])) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'خبر رد شده قابل انتشار نیست.'
+                ], 422);
+            }
+
             $post->publish();
+
+            // اطلاع‌رسانی انتشار به خبرنگار از طریق ربات بله
+            try {
+                $notifier->notifyAuthorPublished($post);
+            } catch (\Throwable $e) {
+                report($e);
+            }
+
+            if (request()->ajax()) {
+                return response()->json(['success' => true, 'message' => 'خبر با موفقیت منتشر شد.']);
+            }
+
             return redirect()
                 ->back()
                 ->with('success', 'خبر با موفقیت منتشر شد.');
         } catch (\Exception $e) {
+            if (request()->ajax()) {
+                return response()->json(['success' => false, 'message' => 'خطا در انتشار خبر'], 500);
+            }
+
             return redirect()
                 ->back()
                 ->with('error', 'خطا در انتشار خبر: ' . $e->getMessage());

@@ -1,6 +1,9 @@
 <?php
 
+use App\Http\Controllers\Account\BaleLinkController;
+use App\Http\Controllers\Account\ProfileController;
 use App\Http\Controllers\Admin\Auth\LoginController;
+use App\Http\Controllers\Admin\BaleSettingsController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\AdminController;
@@ -10,7 +13,9 @@ use App\Http\Controllers\Admin\TagController;
 use App\Http\Controllers\Author\Auth\LoginController as AuthLoginController;
 use App\Http\Controllers\Author\DashboardController as AuthorDashboardController;
 use App\Http\Controllers\Author\PostController as AuthorPostController;
+use App\Http\Controllers\BaleWebhookController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\PostReviewController;
 use Illuminate\Support\Facades\Route;
 
 // Route::get('/', function () {
@@ -30,7 +35,19 @@ Route::prefix('didebaneshahr/admin')->name('admin.')->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'dashboard'])->name('show.dashboard');
     });
 
-    Route::middleware('auth:admin')->group(function () {
+    /*
+     | تنظیمات ربات بله — فقط super-admin
+     */
+    Route::middleware(['auth:admin', 'role:super-admin'])->group(function () {
+        Route::get('/bale-settings', [BaleSettingsController::class, 'index'])->name('bale.index');
+        Route::post('/bale-settings', [BaleSettingsController::class, 'store'])->name('bale.store');
+    });
+
+    /*
+     | بخش‌های مدیریتی — فقط admin و super-admin
+     | نویسنده (author) به هیچ‌کدام دسترسی ندارد.
+     */
+    Route::middleware(['auth:admin', 'role:admin'])->group(function () {
 
         Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
@@ -107,11 +124,12 @@ Route::prefix('author')->name('author.')->group(function () {
         Route::post('/login/verify', [AuthLoginController::class, 'verifyLoginChallenge'])->name('login.verify');
     });
 
-    Route::middleware('auth:admin')->group(function () {
+    /*
+     | پنل نویسنده — فقط نقش author (ادمین‌ها از پنل خودشان استفاده کنند)
+     | دسترسی فقط به: داشبورد، ثبت/ویرایش/حذف خبر خودش
+     */
+    Route::middleware(['auth:admin', 'role:author'])->group(function () {
         Route::get('/dashboard', [AuthorDashboardController::class, 'dashboard'])->name('show.dashboard');
-    });
-
-    Route::middleware('auth:admin')->group(function () {
 
         Route::post('/logout', [AuthLoginController::class, 'logout'])->name('logout');
 
@@ -165,5 +183,67 @@ Route::get('/feed', [HomeController::class, 'feed'])->name('news.feed');
 // لیست یادداشت‌ها
 Route::get('/notes', [HomeController::class, 'allNotes'])->name('notes');
 
+/*
+|--------------------------------------------------------------------------
+| آپلود تصویر داخل ویرایشگر (CKEditor) — برای نویسنده و ادمین
+|--------------------------------------------------------------------------
+*/
+Route::middleware('auth:admin')->group(function () {
+    Route::post('/editor/upload-image', function (\Illuminate\Http\Request $request) {
+        $request->validate([
+            'upload' => ['required', 'image', 'mimes:jpeg,png,jpg,gif,webp', 'max:5120'],
+        ], [
+            'upload.required' => 'فایلی انتخاب نشده است',
+            'upload.image' => 'فایل باید تصویر باشد',
+            'upload.max' => 'حجم تصویر نباید بیشتر از ۵ مگابایت باشد',
+        ]);
+
+        $path = $request->file('upload')->store('posts/content', 'public');
+
+        return response()->json([
+            'uploaded' => 1,
+            'fileName' => basename($path),
+            'url' => asset('storage/' . $path),
+        ]);
+    })->name('editor.upload');
+});
+
+/*
+|--------------------------------------------------------------------------
+| حساب کاربری مشترک (نویسنده و ادمین): پروفایل و اتصال ربات بله
+|--------------------------------------------------------------------------
+*/
+Route::middleware('auth:admin')->group(function () {
+    Route::get('/account/profile', [ProfileController::class, 'edit'])->name('account.profile');
+    Route::put('/account/profile', [ProfileController::class, 'update'])->name('account.profile.update');
+
+    Route::get('/account/bale', [BaleLinkController::class, 'index'])->name('account.bale');
+    Route::post('/account/bale/code', [BaleLinkController::class, 'createCode'])->name('account.bale.code');
+    Route::post('/account/bale/unlink', [BaleLinkController::class, 'unlink'])->name('account.bale.unlink');
+});
+
+/*
+| Webhook ربات بله — مسیر با توکن تصادفی ایمن می‌شود و فقط از سمت سرورهای بله صدا زده می‌شود.
+| آدرس webhook: {APP_URL}/bale-webhook/{BALE_WEBHOOK_SECRET}
+*/
+Route::post('/bale-webhook/{secret}', BaleWebhookController::class)
+    ->name('bale.webhook')
+    ->middleware('throttle:120,1');
+
 // لیست مصاحبه‌ها
 Route::get('/interviews', [HomeController::class, 'allInterviews'])->name('interviews');
+
+/*
+|--------------------------------------------------------------------------
+| بررسی خبر از طریق لینک امن ربات بله
+|--------------------------------------------------------------------------
+| دسترسی با توکن ۴۸ کاراکتری یک‌بارمصرف (هش‌شده در دیتابیس) انجام می‌شود.
+| نمایش با GET و تصمیم‌گیری (تایید/رد) فقط با POST و CSRF ممکن است.
+| مهم: روت «result» باید قبل از روت پارامتری {token} ثبت شود تا قاطی نشود.
+*/
+Route::get('/post-review/result', [PostReviewController::class, 'result'])->name('posts.review.result');
+
+Route::middleware('throttle:60,1')->group(function () {
+    Route::get('/post-review/{token}', [PostReviewController::class, 'show'])->name('posts.review.show');
+    Route::post('/post-review/{token}/decide', [PostReviewController::class, 'decide'])->name('posts.review.decide');
+});

@@ -88,6 +88,21 @@
                         </div>
                     </div>
 
+                    <!-- اطلاع‌رسانی اتصال بله -->
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <div class="alert alert-info d-flex align-items-start mb-0" role="alert">
+                                <i class="bx bx-message-square-dots fs-4 me-2"></i>
+                                <div>
+                                    <strong>اتصال به ربات بله:</strong>
+                                    نیازی به وارد کردن شناسه نیست! پس از ساخت کاربر، خود کاربر از پنل خودش
+                                    (بخش «اتصال ربات بله») یک کد یک‌بارمصرف می‌گیرد و در ربات ارسال می‌کند؛
+                                    اتصال خودکار انجام می‌شود و اعلان‌های تایید/رد خبر برایش ارسال می‌گردد.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- ردیف جدید: انتخاب نقش‌ها -->
                     <div class="row mb-3">
                         <div class="col-md-12">

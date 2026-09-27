@@ -52,15 +52,6 @@ class Post extends Model
             if (empty($post->slug)) {
                 $post->slug = $post->generateSlug($post->title);
             }
-
-            // تنظیم خودکار وضعیت بر اساس نقش کاربر
-            $user = Auth::guard('admin')->user();
-            if ($user && $user->hasRole('super-admin') || $user->hasRole('admin')) {
-                $post->status = 'published';
-                $post->published_at = now();
-            } else {
-                $post->status = 'pending';
-            }
         });
 
         static::updating(function ($post) {
@@ -127,6 +118,22 @@ class Post extends Model
     public function approver()
     {
         return $this->belongsTo(Admin::class, 'approved_by');
+    }
+
+    /**
+     * تگ‌های خبر (رابطه چند‌به‌چند با جدول post_tag).
+     */
+    public function tags()
+    {
+        return $this->belongsToMany(Tag::class);
+    }
+
+    /**
+     * توکن‌های امن لینک بررسی که از طریق ربات بله ارسال شده‌اند.
+     */
+    public function reviewTokens()
+    {
+        return $this->hasMany(PostReviewToken::class);
     }
 
     // اسکوپ‌ها

@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="fa" class="light-style customizer-hide" dir="rtl" data-theme="theme-default"
-    data-assets-path="../../assets/" data-template="vertical-menu-template">
+    data-assets-path="{{ asset('assets') }}/" data-template="vertical-menu-template">
 
 <head>
     <meta charset="utf-8">

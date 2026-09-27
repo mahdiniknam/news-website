@@ -29,6 +29,7 @@ class StoreAdminRequest extends FormRequest
             'bio' => ['nullable', 'string', 'max:1000'],
             'avatar' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,webp', 'max:10240'],
             'is_active' => ['nullable', 'boolean'],
+            // شناسه بله دیگر از فرم گرفته نمی‌شود؛ اتصال فقط با کد احراز هویت از پنل خود کاربر انجام می‌شود
             'roles' => ['required', 'array', 'min:1'],
             'roles.*' => ['exists:roles,name'],
         ];

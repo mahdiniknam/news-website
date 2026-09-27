@@ -5,7 +5,11 @@
 @section('author-content')
     <div class="container-xxl flex-grow-1 container-p-y">
         <div class="mb-4">
-            <h4 class="mb-1">ایجاد خبر جدید</h4>
+            <h4 class="mb-1">ثبت خبر جدید</h4>
+            <p class="text-muted mb-0">
+                <i class="bx bx-info-circle me-1"></i>
+                خبر پس از ثبت، برای تایید به مدیر ارسال می‌شود و نتیجه از طریق ربات بله به شما اعلام می‌گردد.
+            </p>
         </div>
 
         <div class="card">
@@ -144,13 +148,17 @@
                         <!-- دکمه‌ها -->
                         <div class="col-12 mt-3">
                             <button type="submit" class="btn btn-primary">
-                                <i class="bx bx-save me-1"></i>
-                                ذخیره خبر
+                                <i class="bx bx-send me-1"></i>
+                                ارسال خبر برای تایید
                             </button>
                             <a href="{{ route('author.posts.index') }}" class="btn btn-outline-secondary">
                                 <i class="bx bx-x me-1"></i>
                                 انصراف
                             </a>
+                            <small class="d-block text-muted mt-2">
+                                <i class="bx bx-shield me-1"></i>
+                                خبر شما با وضعیت «در انتظار بررسی» ثبت می‌شود و پس از تایید مدیر منتشر خواهد شد.
+                            </small>
                         </div>
                     </div>
                 </form>
@@ -202,8 +210,8 @@
             font_names: 'IRANSans;IRAN Sans;Arial;Times New Roman;Verdana;Tahoma;',
 
             // تنظیمات آپلود تصویر
-            filebrowserUploadUrl: '/admin/upload-image',
-            filebrowserImageUploadUrl: '/admin/upload-image',
+            filebrowserUploadUrl: '{{ route('editor.upload') }}',
+            filebrowserImageUploadUrl: '{{ route('editor.upload') }}',
             filebrowserUploadMethod: 'form'
         });
     </script>

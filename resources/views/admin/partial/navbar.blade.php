@@ -49,8 +49,14 @@
                  <li class="nav-item navbar-dropdown dropdown-user dropdown">
                      <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);"
                          data-bs-toggle="dropdown">
+                         @php $adminUser = auth()->guard('admin')->user(); @endphp
                          <div class="avatar avatar-online">
-                             <img src="../../assets/img/avatars/1.png" alt class="rounded-circle">
+                             @if ($adminUser?->avatar)
+                                 <img src="{{ asset('storage/' . $adminUser->avatar) }}" alt class="rounded-circle">
+                             @else
+                                 <span class="avatar-initial rounded-circle bg-label-primary d-flex align-items-center justify-content-center"
+                                     style="width: 100%; height: 100%;">{{ mb_substr($adminUser?->name ?? '؟', 0, 1) }}</span>
+                             @endif
                          </div>
                      </a>
                      <ul class="dropdown-menu dropdown-menu-end">
@@ -59,7 +65,13 @@
                                  <div class="d-flex align-items-center">
                                      <div class="flex-shrink-0 me-3">
                                          <div class="avatar avatar-online">
-                                             <img src="../../assets/img/avatars/1.png" alt class="rounded-circle">
+                                             @if ($adminUser?->avatar)
+                                                 <img src="{{ asset('storage/' . $adminUser->avatar) }}" alt
+                                                     class="rounded-circle">
+                                             @else
+                                                 <span class="avatar-initial rounded-circle bg-label-primary d-flex align-items-center justify-content-center"
+                                                     style="width: 100%; height: 100%;">{{ mb_substr($adminUser?->name ?? '؟', 0, 1) }}</span>
+                                             @endif
                                          </div>
                                      </div>
                                      @php
@@ -84,9 +96,15 @@
                              <div class="dropdown-divider"></div>
                          </li>
                          <li>
-                             <a class="dropdown-item" href="pages-profile-user.html">
+                             <a class="dropdown-item" href="{{ route('account.profile') }}">
                                  <i class="bx bx-user me-2"></i>
-                                 <span class="align-middle">پروفایل من</span>
+                                 <span class="align-middle">اطلاعات من</span>
+                             </a>
+                         </li>
+                         <li>
+                             <a class="dropdown-item" href="{{ route('account.bale') }}">
+                                 <i class="bx bx-message-square-dots me-2"></i>
+                                 <span class="align-middle">اتصال ربات بله</span>
                              </a>
                          </li>
 

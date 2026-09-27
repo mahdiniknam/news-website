@@ -43,7 +43,7 @@
                                     </td>
                                 @else
                                     <td>
-                                        <img src="../../assets/img/avatars/1.png" alt="{{ $admin->name }}" width="30"
+                                        <img src="{{ asset("assets/img/avatars/1.png") }}" alt="{{ $admin->name }}" width="30"
                                             height="30" class="rounded-circle">
                                     </td>
                                 @endif

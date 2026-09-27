@@ -4,7 +4,7 @@
              <div class="logo-container">
                  <a class="logo-text" href="/">
                      <span class="app-brand-logo demo">
-                         <img src="../../assets/img/branding/logo.png" alt="لوگو" width="40" height="40">
+                         <img src="{{ asset('assets/img/branding/logo.png') }}" alt="لوگو" width="40" height="40">
                      </span>
                      {{ config('app.name', 'پایگاه خبری دید بان شهر') }}
                  </a>

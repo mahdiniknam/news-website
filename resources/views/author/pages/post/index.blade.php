@@ -5,7 +5,13 @@
 @section('author-content')
     <div class="container-xxl flex-grow-1 container-p-y">
         <div class="mb-4 d-flex justify-content-between align-items-center">
-            <h4 class="mb-1">مدیریت پست</h4>
+            <div>
+                <h4 class="mb-1">مدیریت پست</h4>
+                <p class="text-muted mb-0">
+                    <i class="bx bx-info-circle me-1"></i>
+                    خبرهای شما پس از ثبت برای مدیر ارسال می‌شود و نتیجه تایید یا رد از طریق ربات بله برایتان ارسال می‌شود.
+                </p>
+            </div>
             <a href="{{ route('author.posts.create') }}" class="btn btn-primary">
                 <i class="bx bx-plus me-1"></i>
                 خبر جدید
@@ -33,9 +39,6 @@
                                     <td>{{ $post->id }}</td>
                                     <td>
                                         <strong>{{ Str::limit($post->title,10,'...') }}</strong>
-                                        @if ($post->special)
-                                            <span class="badge bg-danger ms-1">اسلاید</span>
-                                        @endif
                                         @if ($post->is_featured)
                                             <span class="badge bg-warning ms-1">ویژه</span>
                                         @endif
@@ -71,6 +74,10 @@
                                                         onclick="showRejectionReason({{ $post->id }})">
                                                         <i class="bx bx-info-circle me-1"></i> نمایش دلیل رد
                                                     </button>
+                                                @elseif ($post->status === 'pending')
+                                                    <div class="dropdown-item text-muted small">
+                                                        <i class="bx bx-time-five me-1"></i> در انتظار بررسی مدیر
+                                                    </div>
                                                 @endif
 
                                               

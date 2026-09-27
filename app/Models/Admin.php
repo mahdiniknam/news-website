@@ -19,6 +19,7 @@ class Admin extends Authenticatable
         'avatar',
         'bio',
         'is_active',
+        'bale_chat_id',
     ];
 
     protected $hidden = [

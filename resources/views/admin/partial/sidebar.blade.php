@@ -2,9 +2,9 @@
         <div class="app-brand demo">
             <a href="index.html" class="app-brand-link">
                 <span class="app-brand-logo demo">
-                    <img src="../../assets/img/branding/logo.png" alt="لوگو" width="26" height="26">
+                    <img src="{{ asset('assets/img/branding/logo.png') }}" alt="لوگو" width="26" height="26">
                 </span>
-                <span class="app-brand-text demo menu-text fw-bold ms-2">دیده بان شهر</span>
+                <span class="app-brand-text demo menu-text fw-bold ms-2">دید بان شهر</span>
             </a>
 
             <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto">
@@ -76,6 +76,14 @@
                     <a href="{{ route('admin.categories.index') }}" class="menu-link">
                         <i class="menu-icon tf-icons bx bx-home-circle"></i>
                         <div>دسته بندی ها</div>
+                    </a>
+                </li>
+            @endrole
+            @role('super-admin')
+                <li class="menu-item {{ request()->routeIs('admin.bale.*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.bale.index') }}" class="menu-link">
+                        <i class="menu-icon tf-icons bx bx-bot"></i>
+                        <div>تنظیمات ربات بله</div>
                     </a>
                 </li>
             @endrole

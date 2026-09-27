@@ -8,6 +8,7 @@ use App\Http\Requests\Author\UpdatePostRequest;
 use App\Models\Category;
 use App\Models\Post;
 use App\Models\Tag;
+use App\Services\PostNotifier;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -44,7 +45,7 @@ class PostController extends Controller
     /**
      * ذخیره خبر جدید
      */
-    public function store(StorePostRequest $request)
+    public function store(StorePostRequest $request, PostNotifier $notifier)
     {
         try {
             $validatedData = $request->validated();
@@ -67,6 +68,13 @@ class PostController extends Controller
             // مدیریت تگ‌ها (اگر تگ‌ها وجود داشته باشند)
             if ($request->has('tags') && !empty($request->tags)) {
                 $post->tags()->sync($request->tags);
+            }
+
+            // اطلاع‌رسانی به مدیران برای بررسی خبر از طریق ربات بله
+            try {
+                $notifier->notifyAdminsNewPost($post);
+            } catch (\Throwable $e) {
+                report($e);
             }
 
             return redirect()
@@ -106,7 +114,7 @@ class PostController extends Controller
     /**
      * به‌روزرسانی خبر
      */
-    public function update(UpdatePostRequest $request, Post $post)
+    public function update(UpdatePostRequest $request, Post $post, PostNotifier $notifier)
     {
         try {
             $user = Auth::guard('admin')->user();
@@ -133,8 +141,11 @@ class PostController extends Controller
             }
 
             // اگر خبر در وضعیت rejected است و دوباره ویرایش می‌شود، به pending برگردد
-            if ($post->status === 'rejected') {
+            $wasRejected = $post->status === 'rejected';
+
+            if ($wasRejected) {
                 $validatedData['status'] = 'pending';
+                $previousReason = $post->rejection_reason;
                 $validatedData['rejection_reason'] = null;
             }
 
@@ -146,9 +157,22 @@ class PostController extends Controller
                 $post->tags()->sync($request->tags);
             }
 
+            // اطلاع‌رسانی به مدیران: خبر رد‌شده پس از اصلاح دوباره ارسال شد
+            if ($wasRejected) {
+                try {
+                    $notifier->notifyAdminsResubmittedPost($post, $previousReason ?? null);
+                } catch (\Throwable $e) {
+                    report($e);
+                }
+            }
+
+            $message = $wasRejected
+                ? 'خبر شما پس از اصلاح، مجدداً برای بررسی ارسال شد. ✅'
+                : 'خبر با موفقیت ویرایش شد.';
+
             return redirect()
                 ->route('author.posts.index')
-                ->with('success', 'خبر با موفقیت ویرایش شد و مجدداً در انتظار تایید است.');
+                ->with('success', $message);
         } catch (\Exception $e) {
             return redirect()
                 ->back()
