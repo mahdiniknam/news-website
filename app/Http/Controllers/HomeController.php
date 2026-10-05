@@ -67,10 +67,10 @@ class HomeController extends Controller
             ->limit(4)
             ->get();
 
-        // دریافت دسته‌بندی‌ها برای منو و سایدبار
         $categories = Category::where('status', 1)
             ->whereNull('parent_id')
             ->with('children')
+            ->withCount(['posts' => fn ($q) => $q->where('status', 'published')])
             ->ordered()
             ->get();
 

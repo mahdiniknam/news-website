@@ -73,6 +73,25 @@ class CategoryController extends Controller
         }
     }
 
+    public function show($slug, \Illuminate\Http\Request $request)
+    {
+        $category = Category::where('slug', $slug)->firstOrFail();
+
+        $posts = \App\Models\Post::with(['author', 'category'])
+            ->where('status', 'published')
+            ->where('category_id', $category->id)
+            ->latest('published_at')
+            ->paginate(12)
+            ->withQueryString();
+
+        $categories = Category::where('status', 1)
+            ->withCount(['posts' => fn ($q) => $q->where('status', 'published')])
+            ->ordered()
+            ->get();
+
+        return view('home.category', compact('category', 'posts', 'categories'));
+    }
+
     public function destroy(Category $category)
     {
         try {

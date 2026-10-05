@@ -95,6 +95,11 @@ class Category extends Model
         return $this->hasMany(Category::class, 'parent_id');
     }
 
+    public function posts()
+    {
+        return $this->hasMany(Post::class);
+    }
+
     // رابطه بازگشتی برای همه زیردسته‌ها
     public function allChildren()
     {
