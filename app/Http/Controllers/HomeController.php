@@ -136,7 +136,7 @@ class HomeController extends Controller
         $query = $request->get('q');
 
         if (empty($query)) {
-            return redirect()->route('news.index');
+            return redirect()->route('news');
         }
 
         $posts = Post::with(['author', 'category'])
