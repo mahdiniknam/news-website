@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>بررسی خبر | دید بان شهر</title>
+    <title>بررسی خبر | دیدبان شهر</title>
     <meta name="robots" content="noindex, nofollow">
 
     <link rel="icon" type="image/x-icon" href="{{ asset('assets/img/favicon/favicon.ico') }}">
@@ -27,7 +27,7 @@
                     <div class="d-flex align-items-center">
                         <img src="{{ asset('assets/img/branding/logo.png') }}" alt="لوگو" width="34" height="34"
                             class="me-2">
-                        <h4 class="mb-0 fw-bold">دید بان شهر</h4>
+                        <h4 class="mb-0 fw-bold">دیدبان شهر</h4>
                     </div>
                     @if ($isLoggedInAdmin)
                         <a href="{{ route('admin.posts.index') }}" class="btn btn-sm btn-label-primary">

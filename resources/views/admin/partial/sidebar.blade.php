@@ -4,7 +4,7 @@
                 <span class="app-brand-logo demo">
                     <img src="{{ asset('assets/img/branding/logo.png') }}" alt="لوگو" width="26" height="26">
                 </span>
-                <span class="app-brand-text demo menu-text fw-bold ms-2">دید بان شهر</span>
+                <span class="app-brand-text demo menu-text fw-bold ms-2">دیدبان شهر</span>
             </a>
 
             <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto">

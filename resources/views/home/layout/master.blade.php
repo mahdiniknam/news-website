@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'پایگاه خبری دید بان شهر')</title>
+    <title>@yield('title', 'پایگاه خبری دیدبان شهر')</title>
 
     <!-- Bootstrap 5 RTL -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css">
@@ -19,11 +19,27 @@
 
     <style>
         :root {
-            --primary-color: #0a58ca;
-            --secondary-color: #6c757d;
-            --dark-bg: #1a1a2e;
-            --dark-surface: #16213e;
-            --light-text: #e0e0e0;
+            --primary-color: #0d6efd;
+            --primary-hover: #0b5ed7;
+            --bs-body-font-family: 'Vazirmatn', Tahoma, sans-serif;
+        }
+
+        [data-bs-theme="light"] {
+            --bs-body-bg: #f8f9fa;
+            --bs-body-color: #212529;
+            --bs-card-bg: #ffffff;
+            --bs-border-color: #e9ecef;
+            --navbar-bg: #ffffff;
+            --footer-bg: #1e293b;
+        }
+
+        [data-bs-theme="dark"] {
+            --bs-body-bg: #0f172a;
+            --bs-body-color: #f8fafc;
+            --bs-card-bg: #1e293b;
+            --bs-border-color: #334155;
+            --navbar-bg: #1e293b;
+            --footer-bg: #0f172a;
         }
 
         * {
@@ -382,18 +398,6 @@
             font-size: 0.9rem;
         }
 
-        /* حالت شب */
-        [data-bs-theme="dark"] {
-            --bs-body-bg: #1a1a2e;
-            --bs-card-bg: #16213e;
-            --bs-navbar-bg: #0f0f23;
-            --bs-heading-color: #e0e0e0;
-            --bs-body-color: #d0d0d0;
-            --bs-border-color: #2a2a4a;
-            --bs-nav-link-color: #d0d0d0;
-            --bs-secondary-color: #a0a0a0;
-        }
-
         [data-bs-theme="dark"] .carousel-item::before {
             background: linear-gradient(to top, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.3) 100%);
         }
@@ -402,29 +406,72 @@
             background: #0a0a1a;
         }
 
-        /* ریسپانسیو */
-        @media (max-width: 768px) {
+        .breaking-ticker {
+            background: linear-gradient(90deg, #dc3545 0%, #c82333 100%);
+            color: #fff;
+            border-radius: 10px;
+            padding: 10px 16px;
+        }
+
+        .breaking-ticker .badge-breaking {
+            background: #fff;
+            color: #dc3545;
+            font-weight: 800;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            flex-shrink: 0;
+        }
+
+        @media (max-width: 576px) {
             .carousel-item {
-                height: 250px;
+                height: 260px;
             }
-
+            .carousel-caption {
+                bottom: 15px;
+                right: 12px;
+                left: 12px;
+                padding: 12px;
+            }
             .carousel-caption h3 {
-                font-size: 1.2rem;
+                font-size: 1.1rem;
+                line-height: 1.6;
             }
-
             .carousel-caption p {
                 font-size: 0.8rem;
+                display: -webkit-box;
+                -webkit-line-clamp: 2;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
             }
-
             .logo-text {
-                font-size: 1.2rem;
+                font-size: 1.15rem;
             }
+            .news-card-img {
+                height: 180px;
+            }
+        }
 
+        @media (min-width: 577px) and (max-width: 991px) {
+            .carousel-item {
+                height: 340px;
+            }
+            .carousel-caption h3 {
+                font-size: 1.4rem;
+            }
+        }
+
+        @media (min-width: 992px) {
+            .carousel-item {
+                height: 420px;
+            }
+        }
+
+        @media (max-width: 768px) {
             .interview-card {
                 flex-direction: column;
                 text-align: center;
             }
-
             .notes-sidebar {
                 margin-top: 20px;
             }
@@ -498,25 +545,20 @@
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // حالت شب/روز
-        const themeToggle = document.getElementById('themeToggle');
-        const themeIcon = document.getElementById('themeIcon');
-        const html = document.documentElement;
-
-        function setTheme(theme) {
-            html.setAttribute('data-bs-theme', theme);
-            localStorage.setItem('theme', theme);
-            themeIcon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
-        }
-
-        // بارگذاری تم ذخیره‌شده
-        const savedTheme = localStorage.getItem('theme') || 'light';
-        setTheme(savedTheme);
-
-        themeToggle.addEventListener('click', () => {
-            const currentTheme = html.getAttribute('data-bs-theme');
-            setTheme(currentTheme === 'dark' ? 'light' : 'dark');
-        });
+        (function() {
+            const themeToggle = document.getElementById('themeToggle');
+            const themeIcon = document.getElementById('themeIcon');
+            const html = document.documentElement;
+            function setTheme(theme) {
+                html.setAttribute('data-bs-theme', theme);
+                localStorage.setItem('theme', theme);
+                if (themeIcon) themeIcon.className = theme === 'dark' ? 'fas fa-sun text-warning' : 'fas fa-moon';
+            }
+            setTheme(localStorage.getItem('theme') || 'light');
+            if (themeToggle) themeToggle.addEventListener('click', () => {
+                setTheme(html.getAttribute('data-bs-theme') === 'dark' ? 'light' : 'dark');
+            });
+        })();
     </script>
 
     <script src="https://trustseal.e-rasaneh.ir/trustseal.js"></script>

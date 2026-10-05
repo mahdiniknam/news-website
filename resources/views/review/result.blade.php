@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نتیجه بررسی | دید بان شهر</title>
+    <title>نتیجه بررسی | دیدبان شهر</title>
     <meta name="robots" content="noindex, nofollow">
 
     <link rel="icon" type="image/x-icon" href="{{ asset('assets/img/favicon/favicon.ico') }}">

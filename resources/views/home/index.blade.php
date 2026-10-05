@@ -3,6 +3,18 @@
 @section('title', 'صفحه اصلی - پایگاه خبری')
 
 @section('content')
+    @if ($slides->isNotEmpty() && isset($news) && $news->isNotEmpty())
+        <div class="breaking-ticker d-flex align-items-center gap-3 mb-3">
+            <span class="badge-breaking"><i class="bi bi-lightning-fill me-1"></i>خبر فوری</span>
+            <span class="flex-grow-1 text-truncate fw-medium small">
+                {{ Str::limit(strip_tags($news->first()->title), 110, '...') }}
+            </span>
+            <a href="{{ route('post.show', $news->first()->slug) }}" class="btn btn-sm btn-light text-danger fw-bold rounded-pill px-3 py-1 flex-shrink-0">
+                مشاهده
+            </a>
+        </div>
+    @endif
+
     <!-- اسلایدر اخبار ویژه -->
     <section class="hero-slider">
         <div id="newsSlider" class="carousel slide" data-bs-ride="carousel">
@@ -19,9 +31,9 @@
                         style="background-image: url('{{ asset('storage/' . $slide->featured_image) }}');">
                         <div class="carousel-caption">
                             <h3>{{ $slide->title }}</h3>
-                            <p>{!! Str::limit($slide->content, 20, '...') !!}</p>
-                            <a href="{{ route('post.show', $slide->slug) }}" class="btn btn-primary btn-sm">
-                                مشاهده خبر
+                            <p>{!! Str::limit(strip_tags($slide->content), 120, '...') !!}</p>
+                            <a href="{{ route('post.show', $slide->slug) }}" class="btn btn-primary btn-sm rounded-pill px-4">
+                                مشاهده خبر <i class="bi bi-arrow-left ms-1"></i>
                             </a>
                         </div>
                     </div>
@@ -49,7 +61,7 @@
             <div class="row">
                 @foreach ($news as $item)
                     <div class="col-md-6 mb-4">
-                        <div class="news-card">
+                        <div class="news-card h-100">
                             @if ($item->featured_image)
                                 <img src="{{ asset('storage/' . $item->featured_image) }}" class="news-card-img"
                                     alt="{{ $item->title }}">
@@ -58,22 +70,22 @@
                                     <i class="fas fa-image fa-3x text-white-50"></i>
                                 </div>
                             @endif
-                            <div class="news-card-body">
+                            <div class="news-card-body d-flex flex-column">
                                 <h5 class="news-card-title">
-                                    <a
-                                        href="{{ route('post.show', $item->slug) }}">{{ Str::limit($item->title, 20, '...') }}</a>
+                                    <a href="{{ route('post.show', $item->slug) }}">{{ Str::limit($item->title, 70, '...') }}</a>
                                 </h5>
-                                <div class="news-card-meta">
-                                    <span><i class="bi bi-calendar3"></i>
-                                        {{ verta($item->published_at)->format('Y/m/d') }}</span>
+                                @if ($item->category)
+                                    <span class="badge bg-primary bg-opacity-10 text-primary align-self-start mb-2">{{ $item->category->name }}</span>
+                                @endif
+                                <p class="news-card-excerpt flex-grow-1">{!! Str::limit(strip_tags($item->content), 150, '...') !!}</p>
+                                <div class="news-card-meta flex-wrap">
+                                    <span><i class="bi bi-calendar3"></i> {{ verta($item->published_at)->format('Y/m/d') }}</span>
                                     <span><i class="bi bi-person"></i> {{ $item->author->name ?? 'ناشناس' }}</span>
                                     @if ($item->category)
                                         <span><i class="bi bi-tag"></i> {{ $item->category->name }}</span>
                                     @endif
                                 </div>
-                                {{-- <p class="news-card-excerpt">{!! Str::limit($item->content,15,'...') !!}</p> --}}
-                                <a href="{{ route('post.show', $item->slug) }}"
-                                    class="btn btn-outline-primary-custom btn-sm mt-3">
+                                <a href="{{ route('post.show', $item->slug) }}" class="btn btn-outline-primary-custom btn-sm mt-3 align-self-start">
                                     مشاهده خبر <i class="bi bi-arrow-left ms-1"></i>
                                 </a>
                             </div>
@@ -98,16 +110,14 @@
                 @forelse($notes as $note)
                     <div class="note-item">
                         <div class="note-item-title">
-                            <a href="{{ route('post.show', $note->slug) }}">{{ $note->title }}</a>
+                            <a href="{{ route('post.show', $note->slug) }}">{{ Str::limit($note->title, 70, '...') }}</a>
                         </div>
+                        <p class="small text-muted mb-1" style="line-height:1.7;">{{ Str::limit(strip_tags($note->content), 90, '...') }}</p>
                         <div class="note-item-meta">
                             <i class="bi bi-calendar3"></i> {{ verta($note->published_at)->format('Y/m/d') }}
                             <span class="mx-2">|</span>
                             <i class="bi bi-person"></i> {{ $note->author->name ?? 'ناشناس' }}
                         </div>
-                        {{-- <div class="note-item-excerpt mt-1" style="font-size: 0.85rem; color: var(--bs-secondary-color);">
-                    {{ $note->excerpt }}
-                </div> --}}
                     </div>
                 @empty
                     <p class="text-muted">هیچ یادداشتی یافت نشد</p>
@@ -127,61 +137,23 @@
                 @forelse($interviews as $interview)
                     <div class="note-item">
                         <div class="note-item-title">
-                            <a href="{{ route('post.show', $interview->slug) }}">{{ $interview->title }}</a>
+                            <a href="{{ route('post.show', $interview->slug) }}">{{ Str::limit($interview->title, 70, '...') }}</a>
                         </div>
+                        <p class="small text-muted mb-1" style="line-height:1.7;">{{ Str::limit(strip_tags($interview->content), 90, '...') }}</p>
                         <div class="note-item-meta">
                             <i class="bi bi-calendar3"></i> {{ verta($interview->published_at)->format('Y/m/d') }}
                             <span class="mx-2">|</span>
                             <i class="bi bi-person"></i> {{ $interview->author->name ?? 'ناشناس' }}
                         </div>
-                        {{-- <div class="note-item-excerpt mt-1" style="font-size: 0.85rem; color: var(--bs-secondary-color);">
-                    {{ $interview->excerpt }}
-                </div> --}}
                     </div>
                 @empty
                     <p class="text-muted">هیچ مصاحبه‌ای یافت نشد</p>
                 @endforelse
 
                 <div class="text-center mt-3">
-                    <a href="{{ route('interviews') }}" class="btn btn-outline-primary-custom btn-sm">مشاهده همه
-                        مصاحبه‌ها</a>
+                    <a href="{{ route('interviews') }}" class="btn btn-outline-primary-custom btn-sm">مشاهده همه مصاحبه‌ها</a>
                 </div>
             </div>
         </div>
     </div>
-
-    <!-- بخش مصاحبه‌ها -->
-    {{-- <section class="interview-section">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h4 class="fw-bold"><i class="bi bi-mic text-primary me-2"></i>مصاحبه‌ها</h4>
-            <a href="{{ route('interviews') }}" class="btn btn-outline-primary-custom btn-sm">مشاهده همه</a>
-        </div>
-
-        <div class="row">
-            @foreach ($interviews as $interview)
-                <div class="col-md-6">
-                    <div class="interview-card">
-                        @if ($interview->author->avatar)
-                            <img src="{{ asset('storage/' . $interview->author->avatar) }}" 
-                                 alt="{{ $interview->author->name }}" 
-                                 class="interview-avatar">
-                        @else
-                            <div class="interview-avatar bg-secondary d-flex align-items-center justify-content-center">
-                                <i class="fas fa-user fa-2x text-white"></i>
-                            </div>
-                        @endif
-                        <div class="interview-content">
-                            <div class="interview-title">
-                                <a href="{{ route('post.show', $interview->slug) }}">{{ $interview->title }}</a>
-                            </div>
-                            <div class="interview-excerpt">{{ $interview->excerpt }}</div>
-                            <div style="font-size: 0.8rem; color: var(--bs-secondary-color); margin-top: 5px;">
-                                <i class="bi bi-calendar3"></i> {{ verta($interview->published_at)->format('Y/m/d') }}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            @endforeach
-        </div>
-    </section> --}}
 @endsection
