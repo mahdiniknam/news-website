@@ -21,7 +21,12 @@ class EnsureRoleIs
         $user = Auth::guard('admin')->user();
 
         if (! $user) {
-            return redirect()->route('admin.login');
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json(['message' => 'نشست شما منقضی شده است'], 401);
+            }
+
+            return redirect()->route('admin.login', ['expired' => 1])
+                ->with('error', 'نشست شما منقضی شده است، لطفا دوباره وارد شوید');
         }
 
         if ($user->hasRole('super-admin')) {

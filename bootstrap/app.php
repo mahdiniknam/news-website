@@ -5,6 +5,7 @@ use App\Http\Middleware\EnsureRoleIs;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Http\Request;
 
 return Application::configure(basePath: dirname(__DIR__))
@@ -13,36 +14,45 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__ . '/../routes/console.php',
         health: '/up',
     )
+    ->withSchedule(function (Schedule $schedule) {
+        $schedule->command('aggregator:poll')->everyFifteenMinutes();
+    })
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
             'auth.admin' => AdminAuth::class,
             'role' => EnsureRoleIs::class,
         ]);
 
-        //
-        // وقتی سشن منقضی می‌شود، middleware «auth» لاراول مهمان را به route('login')
-        // می‌فرستد که در این پروژه وجود ندارد (فقط admin.login / author.login داریم)
-        // و خطای «Route [login] not defined» ظاهر می‌شد.
-        // الان مهمان به صفحه لاگین پنل خودش هدایت می‌شود.
-        //
         $middleware->redirectGuestsTo(function (Request $request) {
-            return $request->routeIs('author.*')
-                ? route('author.login')
-                : route('admin.login');
+            $loginRoute = $request->routeIs('author.*')
+                ? route('author.login', ['expired' => 1])
+                : route('admin.login', ['expired' => 1]);
+
+            if ($request->expectsJson() || $request->ajax()) {
+                return $loginRoute;
+            }
+
+            session()->flash('error', 'نشست شما منقضی شده است، لطفا دوباره وارد شوید');
+
+            return $loginRoute;
         });
 
-        // کاربر لاگین‌شده‌ای که سراغ صفحه لاگین رفت، مستقیم به پنل خودش برود.
         $middleware->redirectUsersTo(function (Request $request) {
             return $request->routeIs('author.*')
                 ? route('author.show.dashboard')
                 : route('admin.show.dashboard');
         });
 
-        // Webhook ربات بله از CSRF مستثناست (امنیت آن با secret در URL تضمین می‌شود)
         $middleware->validateCsrfTokens(except: [
             'bale-webhook/*',
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        $exceptions->render(function (\Symfony\Component\HttpKernel\Exception\NotFoundHttpException $e, \Illuminate\Http\Request $request) {
+            if ($request->expectsJson()) {
+                return null;
+            }
+
+            return response()->view('errors.404', [], 404);
+        });
     })->create();

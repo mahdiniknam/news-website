@@ -16,7 +16,7 @@ class HtmlSanitizer
         'p', 'br', 'hr', 'b', 'strong', 'i', 'em', 'u', 's', 'sub', 'sup',
         'ul', 'ol', 'li', 'blockquote', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
         'table', 'thead', 'tbody', 'tr', 'th', 'td', 'figure', 'figcaption', 'span', 'div',
-        'img', 'a',
+        'img', 'video', 'source', 'a',
     ];
 
     public static function clean(?string $html): string

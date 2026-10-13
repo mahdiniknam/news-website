@@ -17,7 +17,12 @@ class AdminAuth
     public function handle(Request $request, Closure $next): Response
     {
         if (!Auth::guard('admin')->check()) {
-            return redirect()->route('admin.login');
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json(['message' => 'نشست شما منقضی شده است'], 401);
+            }
+
+            return redirect()->route('admin.login', ['expired' => 1])
+                ->with('error', 'نشست شما منقضی شده است، لطفا دوباره وارد شوید');
         }
 
         return $next($request);

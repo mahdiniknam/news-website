@@ -47,11 +47,30 @@ class HomeController extends Controller
 
     public function show($slug)
     {
-        // دریافت پست با اسلاگ و وضعیت منتشر شده
+        $slug = trim(urldecode($slug), '/');
+        $slug = str_replace('/', '-', $slug);
+
         $post = Post::with(['author', 'category'])
             ->where('slug', $slug)
             ->where('status', 'published')
-            ->firstOrFail();
+            ->first();
+
+        if (! $post) {
+            $decoded = trim(urldecode(request()->path()), '/');
+            $decoded = preg_replace('#^news/#', '', $decoded);
+            $decoded = str_replace('/', '-', $decoded);
+            $decoded = trim($decoded, '-');
+            if ($decoded !== $slug) {
+                $post = Post::with(['author', 'category'])
+                    ->where('slug', $decoded)
+                    ->where('status', 'published')
+                    ->first();
+            }
+        }
+
+        if (! $post) {
+            abort(404);
+        }
 
         // افزایش بازدید
         $post->increment('view_count');

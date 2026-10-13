@@ -71,14 +71,12 @@ class Tag extends Model
 
     private function persianSlug($text)
     {
-        // تبدیل حروف فارسی
-        $search = [' ', '،', '؟', '!', ';', ':', '(', ')', '[', ']', '{', '}'];
-        $replace = ['-', '', '', '', '', '', '', '', '', '', '', ''];
+        $search = [' ', '،', '؟', '!', ';', ':', '(', ')', '[', ']', '{', '}', '/', '\\', '؛', '»', '«', '—', '–'];
+        $replace = ['-', '', '', '', '', '', '', '', '', '', '', '', '-', '-', '-', '', '', '-', '-'];
         $text = str_replace($search, $replace, $text);
-
-        // حذف کاراکترهای خاص
         $text = preg_replace('/[^\x{0600}-\x{06FF}\x{2000}-\x{206F}\x{0020}-\x{007E}]+/u', '', $text);
-
+        $text = preg_replace('#/+#', '-', $text);
+        $text = preg_replace('/-+/', '-', $text);
         return trim($text, '-');
     }
 

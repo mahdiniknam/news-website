@@ -90,7 +90,7 @@
             @role('super-admin')
                 <li class="menu-item">
                     <a href="javascript:void(0);" class="menu-link menu-toggle">
-                        <i class="menu-icon tf-icons bx bx-user"></i>
+                        <i class="menu-icon tf-icons bx bx-news"></i>
                         <div>خبر ها</div>
                     </a>
                     <ul class="menu-sub">
@@ -103,6 +103,28 @@
                             <a href="{{ route('admin.posts.create') }}" class="menu-link">
                                 <div>ایجاد</div>
                             </a>
+                        </li>
+                    </ul>
+                </li>
+            @endrole
+            @role('super-admin')
+                <li class="menu-item {{ request()->routeIs('admin.aggregator.*') ? 'active open' : '' }}">
+                    <a href="javascript:void(0);" class="menu-link menu-toggle">
+                        <i class="menu-icon tf-icons bx bx-rss"></i>
+                        <div>تجمیع اخبار</div>
+                    </a>
+                    <ul class="menu-sub">
+                        <li class="menu-item {{ request()->routeIs('admin.aggregator.sources.*') ? 'active' : '' }}">
+                            <a href="{{ route('admin.aggregator.sources.index') }}" class="menu-link"><div>منابع (کانال‌ها)</div></a>
+                        </li>
+                        <li class="menu-item {{ request()->routeIs('admin.aggregator.destinations.*') ? 'active' : '' }}">
+                            <a href="{{ route('admin.aggregator.destinations.index') }}" class="menu-link"><div>ربات‌های انتشار</div></a>
+                        </li>
+                        <li class="menu-item {{ request()->routeIs('admin.aggregator.settings.*') ? 'active' : '' }}">
+                            <a href="{{ route('admin.aggregator.settings.index') }}" class="menu-link"><div>تنظیمات انتشار در سایت</div></a>
+                        </li>
+                        <li class="menu-item {{ request()->routeIs('admin.aggregator.logs.*') ? 'active' : '' }}">
+                            <a href="{{ route('admin.aggregator.logs.index') }}" class="menu-link"><div>لاگ‌ها</div></a>
                         </li>
                     </ul>
                 </li>

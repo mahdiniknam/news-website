@@ -36,6 +36,9 @@
                                         @if ($post->is_featured)
                                             <span class="badge bg-warning ms-1">ویژه</span>
                                         @endif
+                                        @if ($post->is_automated)
+                                            <span class="badge bg-dark ms-1">خودکار</span>
+                                        @endif
                                     </td>
                                     <td>{{ $post->author->name ?? '-' }}</td>
                                     <td>{!! $post->status_badge !!}</td>

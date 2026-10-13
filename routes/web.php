@@ -7,6 +7,10 @@ use App\Http\Controllers\Admin\BaleSettingsController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\AdminController;
+use App\Http\Controllers\Admin\Aggregator\AggregatorLogController;
+use App\Http\Controllers\Admin\Aggregator\AggregatorSettingsController;
+use App\Http\Controllers\Admin\Aggregator\DestinationChannelController;
+use App\Http\Controllers\Admin\Aggregator\SourceChannelController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\PostController;
 use App\Http\Controllers\Admin\TagController;
@@ -104,6 +108,26 @@ Route::prefix('didebaneshahr/admin')->name('admin.')->group(function () {
             Route::put('update/{post}', [PostController::class, 'update'])->name('update');
             Route::delete('destroy/{post}', [PostController::class, 'destroy'])->name('destroy');
         });
+
+        Route::prefix('aggregator/sources')->name('aggregator.sources.')->group(function () {
+            Route::get('/', [SourceChannelController::class, 'index'])->name('index');
+            Route::post('/store', [SourceChannelController::class, 'store'])->name('store');
+            Route::put('/update/{source}', [SourceChannelController::class, 'update'])->name('update');
+            Route::delete('/destroy/{source}', [SourceChannelController::class, 'destroy'])->name('destroy');
+        });
+
+        Route::prefix('aggregator/destinations')->name('aggregator.destinations.')->group(function () {
+            Route::get('/', [DestinationChannelController::class, 'index'])->name('index');
+            Route::post('/store', [DestinationChannelController::class, 'store'])->name('store');
+            Route::put('/update/{destination}', [DestinationChannelController::class, 'update'])->name('update');
+            Route::delete('/destroy/{destination}', [DestinationChannelController::class, 'destroy'])->name('destroy');
+        });
+
+        Route::prefix('aggregator')->name('aggregator.')->group(function () {
+            Route::get('/settings', [AggregatorSettingsController::class, 'index'])->name('settings.index');
+            Route::post('/settings', [AggregatorSettingsController::class, 'store'])->name('settings.store');
+            Route::get('/logs', [AggregatorLogController::class, 'index'])->name('logs.index');
+        });
     });
 });
 
@@ -162,8 +186,8 @@ Route::prefix('author')->name('author.')->group(function () {
 // صفحه اصلی
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
-// نمایش خبر
-Route::get('/news/{slug}', [HomeController::class, 'show'])->name('post.show');
+// نمایش خبر — اسلاگ‌های قدیمی که «/» داشتند هم باید باز شود (where where handles remaining path)
+Route::get('/news/{slug}', [HomeController::class, 'show'])->where('slug', '.*')->name('post.show');
 
 // لیست اخبار بر اساس دسته‌بندی
 Route::get('/category/{slug}', [CategoryController::class, 'show'])->name('category.show');

@@ -29,11 +29,14 @@ class Post extends Model
         'meta_title',
         'meta_description',
         'type',
+        'is_automated',
+        'source_channel_id',
+        'original_source_url',
     ];
 
     protected $casts = [
         'is_featured' => 'boolean',
-
+        'is_automated' => 'boolean',
         'approved_at' => 'datetime',
         'published_at' => 'datetime',
         'view_count' => 'integer',
@@ -84,23 +87,30 @@ class Post extends Model
 
     private function persianSlug($text)
     {
-        $search = [' ', '،', '؟', '!', ';', ':', '(', ')', '[', ']', '{', '}'];
-        $replace = ['-', '', '', '', '', '', '', '', '', '', '', ''];
+        $search = [' ', '،', '؟', '!', ';', ':', '(', ')', '[', ']', '{', '}', '/', '\\', '؛', '»', '«', '—', '–'];
+        $replace = ['-', '', '', '', '', '', '', '', '', '', '', '', '-', '-', '-', '', '', '-', '-'];
         $text = str_replace($search, $replace, $text);
         $text = preg_replace('/[^\x{0600}-\x{06FF}\x{2000}-\x{206F}\x{0020}-\x{007E}]+/u', '', $text);
+        $text = preg_replace('#/+#', '-', $text);
+        $text = preg_replace('/-+/', '-', $text);
         return trim($text, '-');
     }
 
     private function makeUniqueSlug($slug)
     {
-        $originalSlug = $slug;
+        $originalSlug = mb_substr($slug, 0, 180);
+        $originalSlug = trim($originalSlug, '-');
+        if ($originalSlug === '') $originalSlug = 'post-' . time();
+        $slug = $originalSlug;
         $counter = 1;
-
-        while (static::where('slug', $slug)->exists()) {
+        while (static::withTrashed()->where('slug', $slug)->exists()) {
             $slug = $originalSlug . '-' . $counter;
             $counter++;
+            if ($counter > 100) {
+                $slug = $originalSlug . '-' . time() . '-' . $counter;
+                break;
+            }
         }
-
         return $slug;
     }
 
@@ -134,6 +144,11 @@ class Post extends Model
     public function reviewTokens()
     {
         return $this->hasMany(PostReviewToken::class);
+    }
+
+    public function sourceChannel()
+    {
+        return $this->belongsTo(SourceChannel::class);
     }
 
     // اسکوپ‌ها

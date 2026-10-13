@@ -9,8 +9,16 @@ use Illuminate\Support\Facades\Auth;
 
 class LoginController extends Controller
 {
-    public function showLoginForm()
+    public function showLoginForm(Request $request)
     {
+        if (Auth::guard('admin')->check()) {
+            return redirect()->route('author.show.dashboard');
+        }
+
+        if ($request->has('expired')) {
+            session()->flash('error', 'نشست شما منقضی شده است، لطفا دوباره وارد شوید');
+        }
+
         return view('author.pages.auth.login');
     }
 
@@ -21,13 +29,24 @@ class LoginController extends Controller
         $isLoggedIn = Auth::guard('admin')->attempt($data);
 
         if (!$isLoggedIn) {
-            return back()->withInput($request->only('emial'))->withErrors([
-                'email' => 'ایمیل یا رمز عبور صحیح نمیباشد',
+            return back()->withInput($request->only('email'))->withErrors([
+                'email' => 'ایمیل یا رمز عبور صحیح نمی‌باشد',
             ]);
         }
+
+        $user = Auth::guard('admin')->user();
+
+        if ($user && !$user->is_active) {
+            Auth::guard('admin')->logout();
+
+            return back()->withInput($request->only('email'))->withErrors([
+                'email' => 'حساب شما غیرفعال است',
+            ]);
+        }
+
         $request->session()->regenerate();
 
-        return redirect()->intended(route('author.show.dashboard'))->with('success', 'ورود موفقیت آمیز');
+        return redirect()->intended(route('author.show.dashboard'))->with('success', 'ورود موفقیت‌آمیز');
     }
 
     public function logout(Request $request)
