@@ -88,24 +88,35 @@
                 @endif
 
                 <!-- اشتراک‌گذاری -->
-                <div class="share-buttons mt-4 pt-3 border-top">
-                    <p class="fw-bold">اشتراک‌گذاری:</p>
-                    <div class="d-flex gap-2 flex-wrap">
-                        <a href="https://telegram.me/share/url?url={{ urlencode(url()->current()) }}&text={{ urlencode($post->title) }}" 
-                           target="_blank" class="btn btn-sm btn-primary">
-                            <i class="fab fa-telegram me-1"></i> تلگرام
+                <div class="share-section mt-4 pt-3 border-top">
+                    <div class="d-flex flex-wrap align-items-center gap-2">
+                        <span class="fw-bold me-1" style="font-size:0.95rem;">اشتراک‌گذاری:</span>
+                        <a href="https://telegram.me/share/url?url={{ urlencode(url()->current()) }}&text={{ urlencode(mb_substr($post->title,0,80)) }}" target="_blank" rel="noopener" class="btn-share btn-telegram" title="اشتراک در تلگرام" aria-label="تلگرام">
+                            <i class="fab fa-telegram-plane"></i>
+                            <span>تلگرام</span>
                         </a>
-                        <a href="https://wa.me/?text={{ urlencode($post->title . ' - ' . url()->current()) }}" 
-                           target="_blank" class="btn btn-sm btn-success">
-                            <i class="fab fa-whatsapp me-1"></i> واتس‌اپ
+                        <a href="https://wa.me/?text={{ urlencode(mb_substr($post->title,0,80).' - '.url()->current()) }}" target="_blank" rel="noopener" class="btn-share btn-whatsapp" title="اشتراک در واتس‌اپ" aria-label="واتس‌اپ">
+                            <i class="fab fa-whatsapp"></i>
+                            <span>واتس‌اپ</span>
                         </a>
-                        <a href="https://twitter.com/intent/tweet?text={{ urlencode($post->title) }}&url={{ urlencode(url()->current()) }}" 
-                           target="_blank" class="btn btn-sm btn-info text-white">
-                            <i class="fab fa-twitter me-1"></i> توییتر
+                        <a href="https://twitter.com/intent/tweet?text={{ urlencode(mb_substr($post->title,0,80)) }}&url={{ urlencode(url()->current()) }}" target="_blank" rel="noopener" class="btn-share btn-twitter" title="اشتراک در ایکس" aria-label="ایکس">
+                            <i class="fab fa-x-twitter"></i>
+                            <span>ایکس</span>
                         </a>
-                        <button onclick="copyLink()" class="btn btn-sm btn-secondary">
-                            <i class="fas fa-link me-1"></i> کپی لینک
+                        @if(request()->is('news/*') || true)
+                        <button type="button" id="copyLinkBtn" onclick="copyLink()" class="btn-share btn-copy" aria-label="کپی لینک">
+                            <i class="bi bi-link-45deg"></i>
+                            <span id="copyLinkText">کپی لینک</span>
                         </button>
+                        @endif
+                    </div>
+                </div>
+
+                <div id="copyToast" class="copy-toast" role="status" aria-live="polite">
+                    <div class="copy-toast-icon"><i class="bi bi-check-lg"></i></div>
+                    <div class="copy-toast-body">
+                        <strong>کپی شد!</strong>
+                        <span>لینک خبر در کلیپ‌بورد ذخیره شد</span>
                     </div>
                 </div>
             </article>
@@ -201,12 +212,40 @@
     </div>
 @endsection
 
+@push('styles')
+<style>
+.share-section .btn-share{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:999px;font-size:.84rem;font-weight:600;text-decoration:none;border:1px solid transparent;transition:all .2s;cursor:pointer;line-height:1}
+.btn-telegram{background:#229ED9;color:#fff;border-color:#229ED9}.btn-telegram:hover{background:#1c8ac0;color:#fff;transform:translateY(-1px);box-shadow:0 4px 12px rgba(34,158,217,.3)}
+.btn-whatsapp{background:#25D366;color:#fff;border-color:#25D366}.btn-whatsapp:hover{background:#1fb85a;color:#fff;transform:translateY(-1px);box-shadow:0 4px 12px rgba(37,211,102,.3)}
+.btn-twitter{background:#000;color:#fff;border-color:#000}.btn-twitter:hover{background:#222;color:#fff;transform:translateY(-1px)}
+.btn-copy{background:#fff;color:#495057;border-color:#dee2e6}.btn-copy:hover{background:#f8f9fa;border-color:#adb5bd;color:#212529;transform:translateY(-1px)}
+.btn-copy.copied{background:#198754!important;color:#fff!important;border-color:#198754!important}
+.copy-toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(16px);background:#1e293b;color:#fff;padding:12px 18px;border-radius:12px;display:flex;align-items:center;gap:12px;box-shadow:0 8px 32px rgba(0,0,0,.2);opacity:0;visibility:hidden;transition:all .35s cubic-bezier(.34,1.56,.64,1);z-index:9999;min-width:280px;max-width:90vw}
+.copy-toast.show{opacity:1;visibility:visible;transform:translateX(-50%) translateY(0)}
+.copy-toast-icon{width:32px;height:32px;border-radius:50%;background:#22c55e;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:16px}
+.copy-toast-body strong{display:block;font-size:.9rem;line-height:1}.copy-toast-body span{font-size:.78rem;opacity:.85}
+</style>
+@endpush
 @push('scripts')
 <script>
-    function copyLink() {
-        navigator.clipboard.writeText(window.location.href).then(() => {
-            alert('لینک با موفقیت کپی شد!');
-        });
+function copyLink(){
+    const url = window.location.href;
+    const btn = document.getElementById('copyLinkBtn');
+    const txt = document.getElementById('copyLinkText');
+    const toast = document.getElementById('copyToast');
+    function showSuccess(){
+        if(toast){ toast.classList.add('show'); setTimeout(()=>toast.classList.remove('show'), 2600); }
+        if(btn && txt){ const orig = txt.textContent; txt.textContent='کپی شد ✓'; btn.classList.add('copied'); setTimeout(()=>{ txt.textContent=orig; btn.classList.remove('copied'); }, 2200); }
+        if(navigator.vibrate) try{ navigator.vibrate(40);}catch(e){}
     }
+    function fallbackCopy(){
+        const ta=document.createElement('textarea'); ta.value=url; ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.select();
+        try{ document.execCommand('copy'); showSuccess(); }catch(e){ prompt('لینک خبر:', url); }
+        document.body.removeChild(ta);
+    }
+    if(navigator.clipboard && window.isSecureContext){
+        navigator.clipboard.writeText(url).then(showSuccess).catch(fallbackCopy);
+    } else { fallbackCopy(); }
+}
 </script>
 @endpush
