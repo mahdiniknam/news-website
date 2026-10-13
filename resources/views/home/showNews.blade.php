@@ -104,13 +104,10 @@
                             <i class="fab fa-x-twitter"></i>
                             <span>ایکس</span>
                         </a>
-                        <button type="button" id="copyLinkBtn" onclick="copyLink()" class="btn-share btn-copy" aria-label="کپی لینک کوتاه" data-short-url="{{ $shareUrl }}">
+                        <button type="button" id="copyLinkBtn" onclick="copyLink()" class="btn-share btn-copy" aria-label="کپی لینک" data-short-url="{{ $shareUrl }}">
                             <i class="bi bi-link-45deg"></i>
                             <span id="copyLinkText">کپی لینک</span>
                         </button>
-                    </div>
-                    <div class="mt-2 small text-muted" style="font-size:.78rem;">
-                        <i class="bi bi-link me-1"></i> لینک کوتاه: <code dir="ltr" class="user-select-all" style="font-size:.82rem;">{{ $shareUrl }}</code>
                     </div>
                 </div>
 
