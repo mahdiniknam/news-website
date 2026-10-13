@@ -87,28 +87,30 @@
                     </div>
                 @endif
 
-                <!-- اشتراک‌گذاری -->
+                @php $shareUrl = $post->short_url ?? $post->shortUrl ?? route('post.short', $post->short_code); @endphp
+                <!-- اشتراک‌گذاری — شورت‌لینک کوتاه -->
                 <div class="share-section mt-4 pt-3 border-top">
                     <div class="d-flex flex-wrap align-items-center gap-2">
                         <span class="fw-bold me-1" style="font-size:0.95rem;">اشتراک‌گذاری:</span>
-                        <a href="https://telegram.me/share/url?url={{ urlencode(url()->current()) }}&text={{ urlencode(mb_substr($post->title,0,80)) }}" target="_blank" rel="noopener" class="btn-share btn-telegram" title="اشتراک در تلگرام" aria-label="تلگرام">
+                        <a href="https://telegram.me/share/url?url={{ urlencode($shareUrl) }}&text={{ urlencode(mb_substr($post->title,0,80)) }}" target="_blank" rel="noopener" class="btn-share btn-telegram" title="اشتراک در تلگرام" aria-label="تلگرام">
                             <i class="fab fa-telegram-plane"></i>
                             <span>تلگرام</span>
                         </a>
-                        <a href="https://wa.me/?text={{ urlencode(mb_substr($post->title,0,80).' - '.url()->current()) }}" target="_blank" rel="noopener" class="btn-share btn-whatsapp" title="اشتراک در واتس‌اپ" aria-label="واتس‌اپ">
+                        <a href="https://wa.me/?text={{ urlencode(mb_substr($post->title,0,80).' - '.$shareUrl) }}" target="_blank" rel="noopener" class="btn-share btn-whatsapp" title="اشتراک در واتس‌اپ" aria-label="واتس‌اپ">
                             <i class="fab fa-whatsapp"></i>
                             <span>واتس‌اپ</span>
                         </a>
-                        <a href="https://twitter.com/intent/tweet?text={{ urlencode(mb_substr($post->title,0,80)) }}&url={{ urlencode(url()->current()) }}" target="_blank" rel="noopener" class="btn-share btn-twitter" title="اشتراک در ایکس" aria-label="ایکس">
+                        <a href="https://twitter.com/intent/tweet?text={{ urlencode(mb_substr($post->title,0,80)) }}&url={{ urlencode($shareUrl) }}" target="_blank" rel="noopener" class="btn-share btn-twitter" title="اشتراک در ایکس" aria-label="ایکس">
                             <i class="fab fa-x-twitter"></i>
                             <span>ایکس</span>
                         </a>
-                        @if(request()->is('news/*') || true)
-                        <button type="button" id="copyLinkBtn" onclick="copyLink()" class="btn-share btn-copy" aria-label="کپی لینک">
+                        <button type="button" id="copyLinkBtn" onclick="copyLink()" class="btn-share btn-copy" aria-label="کپی لینک کوتاه" data-short-url="{{ $shareUrl }}">
                             <i class="bi bi-link-45deg"></i>
                             <span id="copyLinkText">کپی لینک</span>
                         </button>
-                        @endif
+                    </div>
+                    <div class="mt-2 small text-muted" style="font-size:.78rem;">
+                        <i class="bi bi-link me-1"></i> لینک کوتاه: <code dir="ltr" class="user-select-all" style="font-size:.82rem;">{{ $shareUrl }}</code>
                     </div>
                 </div>
 
@@ -116,7 +118,7 @@
                     <div class="copy-toast-icon"><i class="bi bi-check-lg"></i></div>
                     <div class="copy-toast-body">
                         <strong>کپی شد!</strong>
-                        <span>لینک خبر در کلیپ‌بورد ذخیره شد</span>
+                        <span>لینک کوتاه خبر در کلیپ‌بورد ذخیره شد</span>
                     </div>
                 </div>
             </article>
@@ -229,8 +231,8 @@
 @push('scripts')
 <script>
 function copyLink(){
-    const url = window.location.href;
     const btn = document.getElementById('copyLinkBtn');
+    const url = (btn && btn.dataset.shortUrl) ? btn.dataset.shortUrl : window.location.href;
     const txt = document.getElementById('copyLinkText');
     const toast = document.getElementById('copyToast');
     function showSuccess(){

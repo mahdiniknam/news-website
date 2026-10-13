@@ -45,6 +45,16 @@ class HomeController extends Controller
         return view('home.index', compact('slides', 'news', 'notes', 'interviews'));
     }
 
+    public function short(string $code)
+    {
+        $post = Post::with(['author', 'category'])
+            ->where('short_code', $code)
+            ->where('status', 'published')
+            ->firstOrFail();
+
+        return redirect()->route('post.show', $post->slug, 301);
+    }
+
     public function show($slug)
     {
         $slug = trim(urldecode($slug), '/');

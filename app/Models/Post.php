@@ -18,6 +18,7 @@ class Post extends Model
         'approved_by',
         'title',
         'slug',
+        'short_code',
         'content',
         'featured_image',
         'status',
@@ -55,6 +56,9 @@ class Post extends Model
             if (empty($post->slug)) {
                 $post->slug = $post->generateSlug($post->title);
             }
+            if (empty($post->short_code)) {
+                $post->short_code = static::generateShortCode();
+            }
         });
 
         static::updating(function ($post) {
@@ -62,6 +66,21 @@ class Post extends Model
                 $post->slug = $post->generateSlug($post->title);
             }
         });
+    }
+
+    public static function generateShortCode(): string
+    {
+        $alphabet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        do {
+            $code = '';
+            for ($i = 0; $i < 6; $i++) $code .= $alphabet[random_int(0, 61)];
+        } while (static::withTrashed()->where('short_code', $code)->exists());
+        return $code;
+    }
+
+    public function getShortUrlAttribute(): string
+    {
+        return route('post.short', $this->short_code);
     }
 
     // تولید اسلاگ

@@ -183,6 +183,9 @@ Route::prefix('author')->name('author.')->group(function () {
 
 
 
+// شورت‌لینک کوتاه برای اشتراک‌گذاری — https://didebaneshahr.ir/s/Ab3x9Z → 301 به /news/{slug}
+Route::get('/s/{code}', [HomeController::class, 'short'])->where('code', '[A-Za-z0-9]{6}')->name('post.short');
+
 // صفحه اصلی
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
